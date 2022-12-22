@@ -14,5 +14,12 @@ set(CMAKE_AUTOUIC ON)
 find_package(Qt6 REQUIRED COMPONENTS Widgets)
 find_package(Qt6 REQUIRED COMPONENTS Charts)
 
-add_executable(main main.cpp)
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup()
+
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}")
+find_package(pybind11 REQUIRED)
+pybind11_add_module(heatfun solver/module.cpp)
+
+add_executable(main solver/main.cpp solver/Interface.cpp solver/Solver.cpp)
 target_link_libraries(main PUBLIC Qt6::Widgets Qt6::Charts)

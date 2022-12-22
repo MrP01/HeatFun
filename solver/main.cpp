@@ -5,9 +5,9 @@ int main(int argc, char **argv) {
   setlocale(LC_NUMERIC, "en_US.UTF-8");
   srand(time(NULL));
 
-  BoxSimulator simulator;
-  simulator.buildUI();
-  simulator.resize(1380, 892);
-  simulator.show();
+  HeatDemonstrator window;
+  window.buildUI();
+  window.resize(1380, 892);
+  window.show();
   return app.exec();
 }

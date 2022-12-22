@@ -27,5 +27,7 @@ _minted-*
 target/
 /.venv
 feedback.pdf
+build/
 stuff/
+.vscode/
 *.protected.pdf
