@@ -27,3 +27,5 @@ _minted-*
 target/
 /.venv
 feedback.pdf
+stuff/
+*protected.pdf
