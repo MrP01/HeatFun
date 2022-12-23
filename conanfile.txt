@@ -1,6 +1,8 @@
 [requires]
 pybind11/2.10.1
 exprtk/0.0.1
+xtensor/0.24.2
 
 [generators]
 CMakeDeps
+cmake
