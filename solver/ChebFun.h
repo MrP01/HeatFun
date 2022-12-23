@@ -1,3 +1,5 @@
+#pragma once
+
 #include <xtensor/xarray.hpp>
 
 class ChebFun {

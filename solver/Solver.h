@@ -1,3 +1,5 @@
+#pragma once
+
 #include "ChebFun.h"
 
 class HeatSolver {

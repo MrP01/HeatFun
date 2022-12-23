@@ -22,4 +22,4 @@ find_package(pybind11 REQUIRED)
 pybind11_add_module(heatfun solver/module.cpp)
 
 add_executable(main solver/main.cpp solver/Interface.cpp solver/Solver.cpp solver/ChebFun.cpp)
-target_link_libraries(main PUBLIC Qt6::Widgets Qt6::Charts)
+target_link_libraries(main PUBLIC Qt6::Widgets Qt6::Charts muparserx)

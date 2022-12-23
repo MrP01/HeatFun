@@ -1,7 +1,10 @@
+#pragma once
+
 #include "Solver.h"
 #include <QApplication>
 #include <QGridLayout>
 #include <QLabel>
+#include <QLineEdit>
 #include <QMainWindow>
 #include <QPushButton>
 #include <QShortcut>
@@ -10,6 +13,7 @@
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QScatterSeries>
+#include <muparserx/mpParser.h>
 
 #define STEPS_PER_FRAME 4        // number of timesteps per frame
 #define FRAMES_PER_MEASUREMENT 2 // how often we measure
@@ -22,6 +26,7 @@ class HeatDemonstrator : public HeatSolver, public QMainWindow {
   QLineSeries *temperatureSeries = new QLineSeries();
   QScatterSeries *chebpointSeries = new QScatterSeries();
 
+  QLineEdit *expressionLineEdit = new QLineEdit();
   QPushButton *stepBtn = new QPushButton("Step");
   QPushButton *controlBtn = new QPushButton("Start");
   QPushButton *reinitBtn = new QPushButton("Re-init");
@@ -40,4 +45,5 @@ class HeatDemonstrator : public HeatSolver, public QMainWindow {
  public:
   HeatDemonstrator() = default;
   void buildUI();
+  void plotAndLoadExpression(std::string expression);
 };
