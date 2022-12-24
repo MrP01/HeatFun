@@ -13,7 +13,6 @@
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QScatterSeries>
-#include <muparserx/mpParser.h>
 
 #define STEPS_PER_FRAME 4        // number of timesteps per frame
 #define FRAMES_PER_MEASUREMENT 2 // how often we measure
@@ -38,6 +37,7 @@ class HeatDemonstrator : public HeatSolver, public QMainWindow {
   size_t _timerId;
   void step();
   void timerEvent(QTimerEvent *event);
+  void plotChebpoints(size_t N);
 
   // very important:
   void setTheme(QChart::ChartTheme theme);

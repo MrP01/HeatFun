@@ -2,11 +2,14 @@
 
 #include <xtensor/xarray.hpp>
 
+typedef xt::xarray<double> Vector;
+
 class ChebFun {
  public:
   xt::xarray<double> coefficients;
 
  public:
-  ChebFun(xt::xarray<double> coeffs);
-  static ChebFun interpolantThrough(xt::xarray<double> y);
+  ChebFun(Vector coeffs);
+  static ChebFun interpolantThrough(Vector y);
+  static Vector chebpoints(size_t N);
 };

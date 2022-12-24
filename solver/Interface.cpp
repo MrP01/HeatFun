@@ -1,9 +1,14 @@
 #include "Interface.h"
 #include <QComboBox>
 
+#define INITIAL_EXPRESSION "sin((4*x)^2) + sin(4*x)^2"
+#define N_LINSPACE_POINTS_TO_PLOT 500
+
 void HeatDemonstrator::buildUI() {
   temperatureSeries->setName("Temperature");
+  chebpointSeries->setName("Chebpoints");
   temperatureChart->addSeries(temperatureSeries);
+  temperatureChart->addSeries(chebpointSeries);
   temperatureChart->createDefaultAxes();
   temperatureChart->axes(Qt::Horizontal).first()->setRange(-1, 1);
   QChartView *temperatureView = new QChartView(temperatureChart);
@@ -11,6 +16,8 @@ void HeatDemonstrator::buildUI() {
   expressionLineEdit->setPlaceholderText("Enter Expression for u_0(x)");
   connect(expressionLineEdit, &QLineEdit::returnPressed,
       [=, this]() { plotAndLoadExpression(expressionLineEdit->text().toStdString()); });
+  plotAndLoadExpression(INITIAL_EXPRESSION);
+  plotChebpoints(120);
 
   QComboBox *themeBox = new QComboBox();
   themeBox->addItem("Light");
@@ -19,7 +26,6 @@ void HeatDemonstrator::buildUI() {
   themeBox->addItem("Brown Sand");
   themeBox->addItem("Icy Blue");
   connect(themeBox, &QComboBox::currentIndexChanged, [=, this]() {
-    std::cout << themeBox->currentIndex();
     switch (themeBox->currentIndex()) {
     case 0:
       setTheme(QChart::ChartThemeLight);
@@ -55,24 +61,13 @@ void HeatDemonstrator::buildUI() {
 }
 
 void HeatDemonstrator::plotAndLoadExpression(std::string expression) {
-  mup::Value variable;
-  mup::ParserX parser;
-  parser.DefineVar("x", mup::Variable(&variable));
-  parser.SetExpr(expression);
-
   temperatureSeries->clear();
-  double y, yMin = 0, yMax = 0;
+  Vector X = xt::linspace(-1.0, 1.0, N_LINSPACE_POINTS_TO_PLOT);
+  Vector Y = evaluateExpression(expression, X);
   try {
-    for (double x = -1.0; x <= 1.0; x += 0.005) {
-      variable = x;
-      y = parser.Eval().GetFloat();
-      temperatureSeries->append(x, y);
-      if (y < yMin)
-        yMin = y;
-      if (y > yMax)
-        yMax = y;
-    }
-    temperatureChart->axes(Qt::Vertical).first()->setRange(yMin - 0.1, yMax + 0.1);
+    for (size_t i = 0; i < N_LINSPACE_POINTS_TO_PLOT; i++)
+      temperatureSeries->append(X[i], Y[i]);
+    temperatureChart->axes(Qt::Vertical).first()->setRange(xt::amin(Y)() - 0.1, xt::amax(Y)() + 0.1);
   } catch (mup::ParserError) {
     std::cout << "Could not parse expression" << std::endl;
   }
@@ -81,5 +76,12 @@ void HeatDemonstrator::plotAndLoadExpression(std::string expression) {
 void HeatDemonstrator::step() {}
 
 void HeatDemonstrator::timerEvent(QTimerEvent *event) {}
+
+void HeatDemonstrator::plotChebpoints(size_t N) {
+  chebpointSeries->clear();
+  Vector chebpoints = ChebFun::chebpoints(N);
+  for (auto iter = chebpoints.begin(); iter != chebpoints.end(); iter++)
+    chebpointSeries->append(*iter, evaluateExpression(INITIAL_EXPRESSION, *iter)[0]);
+}
 
 void HeatDemonstrator::setTheme(QChart::ChartTheme theme) {}
