@@ -3,6 +3,8 @@
 
 HeatSolver::HeatSolver() {}
 
+void HeatSolver::setup(Vector u0) { currentU = ChebFun::interpolantThrough(u0); }
+
 Vector HeatSolver::evaluateExpression(std::string expression, Vector x) {
   mup::Value variable;
   mup::ParserX parser;
@@ -15,5 +17,3 @@ Vector HeatSolver::evaluateExpression(std::string expression, Vector x) {
   }
   return xt::adapt(y, {y.size()});
 }
-
-void HeatSolver::setup(Vector u0) {}

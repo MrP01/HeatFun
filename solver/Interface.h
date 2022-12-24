@@ -2,6 +2,8 @@
 
 #include "Solver.h"
 #include <QApplication>
+#include <QCheckBox>
+#include <QComboBox>
 #include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -22,6 +24,7 @@
 class HeatDemonstrator : public HeatSolver, public QMainWindow {
  private:
   QChart *temperatureChart = new QChart();
+  QLineSeries *u0Series = new QLineSeries();
   QLineSeries *temperatureSeries = new QLineSeries();
   QScatterSeries *chebpointSeries = new QScatterSeries();
 
@@ -30,20 +33,26 @@ class HeatDemonstrator : public HeatSolver, public QMainWindow {
   QPushButton *controlBtn = new QPushButton("Start");
   QPushButton *reinitBtn = new QPushButton("Re-init");
   QPushButton *exportBtn = new QPushButton("Export");
-  QLabel *statsLabel = new QLabel(QString("Heat"));
+  QCheckBox *showChebpoints = new QCheckBox("Show Chebpoints");
+  QLabel *statsLabel = new QLabel("Heat");
 
   size_t _step = 0;
   size_t _start_step = 0;
   size_t _timerId;
   void step();
   void timerEvent(QTimerEvent *event);
-  void plotChebpoints(size_t N);
+
+  void plotChebpoints();
+  void plotCurrentU();
+  void plotXYSeries(QXYSeries *series, Vector X, Vector Y);
 
   // very important:
+  QComboBox *createThemeChooser();
   void setTheme(QChart::ChartTheme theme);
 
  public:
   HeatDemonstrator() = default;
   void buildUI();
-  void plotAndLoadExpression(std::string expression);
+  void setupExpression(std::string expression);
+  void plotAndLoadU0Expression(std::string expression);
 };
