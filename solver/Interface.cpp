@@ -1,6 +1,8 @@
 #include "Interface.h"
 
 #define N_LINSPACE_POINTS_TO_PLOT 500
+static QChart::ChartTheme THEMES[5] = {QChart::ChartThemeLight, QChart::ChartThemeDark, QChart::ChartThemeBlueCerulean,
+    QChart::ChartThemeBrownSand, QChart::ChartThemeBlueIcy};
 
 void HeatDemonstrator::setupExpression(std::string expression) {
   plotAndLoadU0Expression(expression);
@@ -95,23 +97,11 @@ QComboBox *HeatDemonstrator::createThemeChooser() {
   themeBox->addItem("Cerulean Blue");
   themeBox->addItem("Brown Sand");
   themeBox->addItem("Icy Blue");
-  connect(themeBox, &QComboBox::currentIndexChanged, [=, this]() {
-    switch (themeBox->currentIndex()) {
-    case 0:
-      setTheme(QChart::ChartThemeLight);
-    case 1:
-      setTheme(QChart::ChartThemeDark);
-    case 2:
-      setTheme(QChart::ChartThemeBlueCerulean);
-    case 3:
-      setTheme(QChart::ChartThemeBrownSand);
-    case 4:
-      setTheme(QChart::ChartThemeBlueIcy);
-    default:
-      break;
-    }
-  });
+  connect(themeBox, &QComboBox::currentIndexChanged, [=, this]() { setTheme(THEMES[themeBox->currentIndex()]); });
   return themeBox;
 }
 
-void HeatDemonstrator::setTheme(QChart::ChartTheme theme) { temperatureChart->setTheme(theme); }
+void HeatDemonstrator::setTheme(QChart::ChartTheme theme) {
+  std::cout << "Theme set to " << theme << std::endl;
+  temperatureChart->setTheme(theme);
+}
