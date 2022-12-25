@@ -29,20 +29,14 @@ TschebFun TschebFun::interpolantThrough(Vector y) {
 }
 
 Vector TschebFun::evaluateOn(Vector x) {
-  double di, dip1, dip2;
-  size_t N = coefficients.size();
-  Vector cf = xt::zeros_like(x);
-  for (size_t j = 0; j < x.size(); j++) {
-    dip1 = 0.0;
-    di = 0.0;
-    // y = (2.0 * x[j] - a - b) / (b - a);
-
-    for (size_t i = N - 1; 1 <= i; i--) {
-      dip2 = dip1;
-      dip1 = di;
-      di = 2.0 * x[j] * dip1 - dip2 + coefficients[i];
-    }
-    cf[j] = x[j] * di - dip1 + 0.5 * coefficients[0];
+  Vector U_kp2;
+  Vector U_kp1 = xt::zeros_like(x);
+  Vector U_k = xt::ones_like(x) * coefficients[coefficients.size() - 1];
+  for (int k = coefficients.size() - 2; k >= 0; k--) {
+    U_kp2 = U_kp1;
+    U_kp1 = U_k;
+    U_k = 2.0 * x * U_kp1 - U_kp2 + coefficients[k];
+    std::cout << k << " U_k[0] = " << U_k[0] << std::endl;
   }
-  return cf;
+  return (U_k - U_kp2 + coefficients[0]) / 2.0;
 }
