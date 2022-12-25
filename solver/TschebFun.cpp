@@ -1,22 +1,22 @@
 #include "TschebFun.h"
-#include <cmath>
+
+static const double pi = xt::numeric_constants<double>::PI;
 
 TschebFun::TschebFun(Vector coeffs) : coefficients(coeffs) {}
 
-Vector TschebFun::chebpoints(size_t N) { return -xt::cos(xt::linspace(0.0, xt::numeric_constants<double>::PI, N)); }
+Vector TschebFun::chebpoints(size_t N) { return -xt::cos(xt::linspace(0.0, pi, N)); }
 
 TschebFun TschebFun::interpolantThrough(Vector y) {
-  size_t N = y.size();
+  int order = y.size();
+  auto j = xt::linspace(0.0, (double)order, order) * (pi / order);
   Vector coeffs = xt::zeros_like(y); // as many coefficients as data points
-  for (size_t i = 0; i < N; i++) {
-    for (size_t j = 0; j < N; j++) {
-      double angle = (double)(i * (2 * j + 1)) * xt::numeric_constants<double>::PI / (double)(2 * N);
-      coeffs[i] = coeffs[i] + y[j] * cos(angle);
-    }
-  }
-  coeffs = 2.0 * coeffs / N;
+  coeffs[0] = xt::sum(y)() / order;
+  for (size_t k = 1; k < order; k++)
+    coeffs[k] = (2.0 / order) * xt::sum(y * xt::cos(j * k))();
+  assert(coeffs.size() == order);
+
   std::cout << "Chebpoints: " << std::endl;
-  Vector chebpts = TschebFun::chebpoints(N);
+  Vector chebpts = TschebFun::chebpoints(order);
   std::copy(chebpts.begin(), chebpts.end(), std::ostream_iterator<double>(std::cout, ", "));
   std::cout << std::endl;
   std::cout << "Constructed interpolant through " << std::endl;
