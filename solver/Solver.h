@@ -1,11 +1,11 @@
 #pragma once
 
-#include "ChebFun.h"
+#include "TschebFun.h"
 #include <muparserx/mpParser.h>
 
 class HeatSolver {
  protected:
-  ChebFun currentU = ChebFun(1);
+  TschebFun currentU = TschebFun(1);
 
  public:
   HeatSolver();

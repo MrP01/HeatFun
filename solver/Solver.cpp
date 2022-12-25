@@ -3,7 +3,7 @@
 
 HeatSolver::HeatSolver() {}
 
-void HeatSolver::setup(Vector u0) { currentU = ChebFun::interpolantThrough(u0); }
+void HeatSolver::setup(Vector u0) { currentU = TschebFun::interpolantThrough(u0); }
 
 Vector HeatSolver::evaluateExpression(std::string expression, Vector x) {
   mup::Value variable;

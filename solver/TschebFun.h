@@ -4,14 +4,14 @@
 
 typedef xt::xarray<double> Vector;
 
-class ChebFun {
+class TschebFun {
  public:
   xt::xarray<double> coefficients;
 
  public:
-  ChebFun(Vector coeffs);
+  TschebFun(Vector coeffs);
   size_t degree() { return coefficients.size(); };
   Vector evaluateOn(Vector x);
-  static ChebFun interpolantThrough(Vector y);
+  static TschebFun interpolantThrough(Vector y);
   static Vector chebpoints(size_t N);
 };

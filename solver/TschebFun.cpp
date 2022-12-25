@@ -1,11 +1,11 @@
-#include "ChebFun.h"
+#include "TschebFun.h"
 #include <cmath>
 
-ChebFun::ChebFun(Vector coeffs) : coefficients(coeffs) {}
+TschebFun::TschebFun(Vector coeffs) : coefficients(coeffs) {}
 
-Vector ChebFun::chebpoints(size_t N) { return -xt::cos(xt::linspace(0.0, xt::numeric_constants<double>::PI, N)); }
+Vector TschebFun::chebpoints(size_t N) { return -xt::cos(xt::linspace(0.0, xt::numeric_constants<double>::PI, N)); }
 
-ChebFun ChebFun::interpolantThrough(Vector y) {
+TschebFun TschebFun::interpolantThrough(Vector y) {
   size_t N = y.size();
   Vector coeffs = xt::zeros_like(y); // as many coefficients as data points
   for (size_t i = 0; i < N; i++) {
@@ -16,7 +16,7 @@ ChebFun ChebFun::interpolantThrough(Vector y) {
   }
   coeffs = 2.0 * coeffs / N;
   std::cout << "Chebpoints: " << std::endl;
-  Vector chebpts = ChebFun::chebpoints(N);
+  Vector chebpts = TschebFun::chebpoints(N);
   std::copy(chebpts.begin(), chebpts.end(), std::ostream_iterator<double>(std::cout, ", "));
   std::cout << std::endl;
   std::cout << "Constructed interpolant through " << std::endl;
@@ -25,10 +25,10 @@ ChebFun ChebFun::interpolantThrough(Vector y) {
   std::cout << "Resulting Chebyshev coefficients: " << std::endl;
   std::copy(coeffs.begin(), coeffs.end(), std::ostream_iterator<float>(std::cout, ", "));
   std::cout << std::endl;
-  return ChebFun(coeffs);
+  return TschebFun(coeffs);
 }
 
-Vector ChebFun::evaluateOn(Vector x) {
+Vector TschebFun::evaluateOn(Vector x) {
   double di, dip1, dip2;
   size_t N = coefficients.size();
   Vector cf = xt::zeros_like(x);
