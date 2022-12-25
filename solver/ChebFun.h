@@ -10,8 +10,8 @@ class ChebFun {
 
  public:
   ChebFun(Vector coeffs);
-  Vector evaluate(Vector x);
   size_t degree() { return coefficients.size(); };
+  Vector evaluateOn(Vector x);
   static ChebFun interpolantThrough(Vector y);
   static Vector chebpoints(size_t N);
 };

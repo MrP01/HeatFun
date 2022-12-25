@@ -6,10 +6,14 @@ static QChart::ChartTheme THEMES[5] = {QChart::ChartThemeLight, QChart::ChartThe
 
 void HeatDemonstrator::setupExpression(std::string expression) {
   plotAndLoadU0Expression(expression);
-  setup(evaluateExpression(expression, ChebFun::chebpoints(120)));
-  plotCurrentU();
-  if (showChebpoints->isChecked())
-    plotChebpoints();
+  try {
+    setup(evaluateExpression(expression, ChebFun::chebpoints(120)));
+    plotCurrentU();
+    if (showChebpoints->isChecked())
+      plotChebpoints();
+  } catch (mup::ParserError) {
+    std::cout << "Could not parse expression" << std::endl;
+  }
 }
 
 void HeatDemonstrator::plotAndLoadU0Expression(std::string expression) {
@@ -29,13 +33,13 @@ void HeatDemonstrator::timerEvent(QTimerEvent *event) {}
 
 void HeatDemonstrator::plotChebpoints() {
   Vector X = ChebFun::chebpoints(currentU.degree());
-  Vector Y = currentU.evaluate(X);
+  Vector Y = currentU.evaluateOn(X);
   plotXYSeries(chebpointSeries, X, Y);
 }
 
 void HeatDemonstrator::plotCurrentU() {
   Vector X = xt::linspace(-1, 1, N_LINSPACE_POINTS_TO_PLOT);
-  Vector Y = currentU.evaluate(X);
+  Vector Y = currentU.evaluateOn(X);
   plotXYSeries(temperatureSeries, X, Y);
 }
 
