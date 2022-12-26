@@ -43,7 +43,7 @@ class HeatDemonstrator : public HeatSolver, public QMainWindow {
   size_t _start_step = 0;
   size_t _timerId;
   void step();
-  void timerEvent(QTimerEvent *event);
+  void timerEvent(QTimerEvent *event) { step(); };
 
   void plotChebpoints();
   void plotCurrentU();

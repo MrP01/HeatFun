@@ -26,9 +26,10 @@ void HeatDemonstrator::plotAndLoadU0Expression(std::string expression) {
   }
 }
 
-void HeatDemonstrator::step() {}
-
-void HeatDemonstrator::timerEvent(QTimerEvent *event) {}
+void HeatDemonstrator::step() {
+  iterate();
+  plotCurrentU();
+}
 
 void HeatDemonstrator::plotCurrentU() {
   Vector X = xt::linspace(-1.0, 1.0, N_LINSPACE_POINTS_TO_PLOT);
@@ -85,6 +86,17 @@ void HeatDemonstrator::buildUI() {
   connect(differentiationBtn, &QPushButton::clicked, [=, this]() {
     currentU = currentU.derivative();
     plotCurrentU();
+  });
+  connect(stepBtn, &QPushButton::clicked, [=, this]() { step(); });
+  connect(controlBtn, &QPushButton::clicked, [=, this]() {
+    if (controlBtn->text() == "Start") {
+      _timerId = startTimer(100);
+      _start_step = _step;
+      controlBtn->setText("Stop");
+    } else {
+      killTimer(_timerId);
+      controlBtn->setText("Start");
+    }
   });
 
   auto mainWidget = new QWidget(this);

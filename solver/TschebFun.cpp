@@ -1,6 +1,8 @@
 #include "TschebFun.h"
 #include <xtensor/xindex_view.hpp>
+#include <xtensor/xview.hpp>
 
+#define max(a, b) (a > b) ? a : b
 static const double pi = xt::numeric_constants<double>::PI;
 static const double epsilon = 1e-14;
 
@@ -59,6 +61,18 @@ TschebFun TschebFun::derivative() {
   return TschebFun(derivative);
 }
 
-TschebFun TschebFun::operator+(const TschebFun &other) { return TschebFun(coefficients + other.coefficients); }
-TschebFun TschebFun::operator-(const TschebFun &other) { return TschebFun(coefficients - other.coefficients); }
+TschebFun TschebFun::operator+(const TschebFun &other) {
+  size_t mine = coefficients.size(), theirs = other.coefficients.size();
+  Vector new_coeffs = xt::zeros<double>({max(mine, theirs)});
+  xt::view(new_coeffs, xt::range(0, coefficients.size())) += coefficients;
+  xt::view(new_coeffs, xt::range(0, other.coefficients.size())) += other.coefficients;
+  return TschebFun(new_coeffs);
+}
+TschebFun TschebFun::operator-(const TschebFun &other) {
+  size_t mine = coefficients.size(), theirs = other.coefficients.size();
+  Vector new_coeffs = xt::zeros<double>({max(mine, theirs)});
+  xt::view(new_coeffs, xt::range(0, coefficients.size())) += coefficients;
+  xt::view(new_coeffs, xt::range(0, other.coefficients.size())) += other.coefficients;
+  return TschebFun(new_coeffs);
+}
 TschebFun TschebFun::operator*(const double &factor) { return TschebFun(coefficients * factor); }
