@@ -11,6 +11,7 @@
 #include <QPushButton>
 #include <QShortcut>
 #include <QSlider>
+#include <QSpinBox>
 #include <QTimer>
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
@@ -29,8 +30,10 @@ class HeatDemonstrator : public HeatSolver, public QMainWindow {
   QScatterSeries *chebpointSeries = new QScatterSeries();
 
   QLineEdit *expressionLineEdit = new QLineEdit();
-  QPushButton *stepBtn = new QPushButton("Step");
+  QSpinBox *orderEdit = new QSpinBox();
   QPushButton *controlBtn = new QPushButton("Start");
+  QPushButton *stepBtn = new QPushButton("Step");
+  QPushButton *differentiationBtn = new QPushButton("Differentiate");
   QPushButton *reinitBtn = new QPushButton("Re-init");
   QPushButton *exportBtn = new QPushButton("Export");
   QCheckBox *showChebpoints = new QCheckBox("Show Chebpoints");
@@ -55,4 +58,5 @@ class HeatDemonstrator : public HeatSolver, public QMainWindow {
   void buildUI();
   void setupExpression(std::string expression);
   void plotAndLoadU0Expression(std::string expression);
+  std::string getExpression();
 };

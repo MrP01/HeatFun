@@ -7,7 +7,7 @@ static QChart::ChartTheme THEMES[5] = {QChart::ChartThemeLight, QChart::ChartThe
 void HeatDemonstrator::setupExpression(std::string expression) {
   plotAndLoadU0Expression(expression);
   try {
-    setup(evaluateExpression(expression, TschebFun::modifiedChebpoints(5)));
+    setup(evaluateExpression(expression, TschebFun::modifiedChebpoints(orderEdit->value())));
     plotCurrentU();
     if (showChebpoints->isChecked())
       plotChebpoints();
@@ -45,8 +45,13 @@ void HeatDemonstrator::plotChebpoints() {
 
 void HeatDemonstrator::plotXYSeries(QXYSeries *series, Vector X, Vector Y) {
   series->clear();
-  for (size_t i = 0; i < N_LINSPACE_POINTS_TO_PLOT; i++)
+  for (size_t i = 0; i < X.size(); i++)
     series->append(X[i], Y[i]);
+}
+
+std::string HeatDemonstrator::getExpression() {
+  std::string expr = expressionLineEdit->text().toStdString();
+  return expr.size() > 0 ? expr : "sin((4*x)^2) + sin(4*x)^2";
 }
 
 void HeatDemonstrator::buildUI() {
@@ -61,10 +66,8 @@ void HeatDemonstrator::buildUI() {
   QChartView *temperatureView = new QChartView(temperatureChart);
 
   expressionLineEdit->setPlaceholderText("Enter Expression for u_0(x)");
-  connect(expressionLineEdit, &QLineEdit::returnPressed, [=, this]() {
-    std::string expression = expressionLineEdit->text().toStdString();
-    setupExpression(expression);
-  });
+  connect(expressionLineEdit, &QLineEdit::returnPressed, [=, this]() { setupExpression(getExpression()); });
+  connect(orderEdit, &QSpinBox::valueChanged, [=, this]() { setupExpression(getExpression()); });
 
   connect(showChebpoints, &QCheckBox::stateChanged, [=, this]() {
     if (showChebpoints->isChecked()) {
@@ -74,21 +77,34 @@ void HeatDemonstrator::buildUI() {
     } else
       chebpointSeries->setVisible(false);
   });
+  orderEdit->setMinimum(1);
+  orderEdit->setMaximum(2000);
+  orderEdit->setValue(50);
+  orderEdit->setMaximumWidth(200);
+
+  connect(differentiationBtn, &QPushButton::clicked, [=, this]() {
+    currentU = currentU.derivative();
+    plotCurrentU();
+  });
 
   auto mainWidget = new QWidget(this);
   auto mainLayout = new QGridLayout(mainWidget);
-  mainLayout->addWidget(expressionLineEdit, 0, 0);
-  mainLayout->addWidget(temperatureView, 1, 0);
+  auto topLayout = new QHBoxLayout();
+  topLayout->addWidget(expressionLineEdit);
+  topLayout->addWidget(orderEdit);
   auto buttonLayout = new QHBoxLayout();
   buttonLayout->addWidget(controlBtn);
   buttonLayout->addWidget(stepBtn);
+  buttonLayout->addWidget(differentiationBtn);
   buttonLayout->addWidget(reinitBtn);
   buttonLayout->addWidget(exportBtn);
   buttonLayout->addWidget(createThemeChooser());
   buttonLayout->addWidget(showChebpoints);
+  mainLayout->addLayout(topLayout, 0, 0);
+  mainLayout->addWidget(temperatureView, 1, 0);
   mainLayout->addLayout(buttonLayout, 2, 0);
   setCentralWidget(mainWidget);
-  setWindowTitle("Heat Equation Solver");
+  setWindowTitle("Spectral Heat Equation Solver");
 
   QShortcut *closeShortcut = new QShortcut(Qt::CTRL | Qt::Key_W, this);
   QObject::connect(closeShortcut, &QShortcut::activated, this, [=, this]() { close(); });

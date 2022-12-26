@@ -7,7 +7,7 @@ int main(int argc, char **argv) {
 
   HeatDemonstrator window;
   window.buildUI();
-  window.setupExpression("sin((4*x)^2) + sin(4*x)^2");
+  window.setupExpression(window.getExpression());
   window.resize(1380, 892);
   window.show();
   return app.exec();
