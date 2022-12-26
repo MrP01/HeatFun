@@ -21,7 +21,6 @@ void HeatDemonstrator::plotAndLoadU0Expression(std::string expression) {
   try {
     Vector Y = evaluateExpression(expression, X);
     plotXYSeries(u0Series, X, Y);
-    temperatureChart->axes(Qt::Vertical).first()->setRange(xt::amin(Y)() - 0.1, xt::amax(Y)() + 0.1);
   } catch (mup::ParserError) {
     std::cout << "Could not parse expression" << std::endl;
   }
@@ -47,6 +46,7 @@ void HeatDemonstrator::plotXYSeries(QXYSeries *series, Vector X, Vector Y) {
   series->clear();
   for (size_t i = 0; i < X.size(); i++)
     series->append(X[i], Y[i]);
+  temperatureChart->axes(Qt::Vertical).first()->setRange(xt::amin(Y)() - 0.1, xt::amax(Y)() + 0.1);
 }
 
 std::string HeatDemonstrator::getExpression() {
@@ -79,7 +79,7 @@ void HeatDemonstrator::buildUI() {
   });
   orderEdit->setMinimum(1);
   orderEdit->setMaximum(2000);
-  orderEdit->setValue(50);
+  orderEdit->setValue(30);
   orderEdit->setMaximumWidth(200);
 
   connect(differentiationBtn, &QPushButton::clicked, [=, this]() {

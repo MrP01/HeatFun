@@ -58,3 +58,7 @@ TschebFun TschebFun::derivative() {
   print("Derivative coeffs:", derivative);
   return TschebFun(derivative);
 }
+
+TschebFun TschebFun::operator+(const TschebFun &other) { return TschebFun(coefficients + other.coefficients); }
+TschebFun TschebFun::operator-(const TschebFun &other) { return TschebFun(coefficients - other.coefficients); }
+TschebFun TschebFun::operator*(const double &factor) { return TschebFun(coefficients * factor); }

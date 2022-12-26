@@ -14,6 +14,9 @@ class TschebFun {
   size_t degree() { return coefficients.size() - 1; };
   Vector evaluateOn(Vector x);
   TschebFun derivative();
+  TschebFun operator+(const TschebFun &other);
+  TschebFun operator-(const TschebFun &other);
+  TschebFun operator*(const double &factor);
   static TschebFun interpolantThrough(Vector y);
   static Vector chebpoints(size_t N);
   static Vector modifiedChebpoints(size_t N);

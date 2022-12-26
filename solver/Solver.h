@@ -5,10 +5,14 @@
 
 class HeatSolver {
  protected:
+  double alpha = 1.0;
+  double dt = 1e-3;
   TschebFun currentU = TschebFun(1);
 
  public:
   HeatSolver();
   void setup(Vector u0);
-  Vector evaluateExpression(std::string expression, Vector x);
+  void iterate();
 };
+
+Vector evaluateExpression(std::string expression, Vector x);
