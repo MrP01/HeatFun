@@ -7,7 +7,7 @@ static QChart::ChartTheme THEMES[5] = {QChart::ChartThemeLight, QChart::ChartThe
 void HeatDemonstrator::setupExpression(std::string expression) {
   plotAndLoadU0Expression(expression);
   try {
-    setup(evaluateExpression(expression, TschebFun::chebpoints(121)));
+    setup(evaluateExpression(expression, TschebFun::modifiedChebpoints(5)));
     plotCurrentU();
     if (showChebpoints->isChecked())
       plotChebpoints();
@@ -31,16 +31,16 @@ void HeatDemonstrator::step() {}
 
 void HeatDemonstrator::timerEvent(QTimerEvent *event) {}
 
-void HeatDemonstrator::plotChebpoints() {
-  Vector X = TschebFun::chebpoints(currentU.degree());
-  Vector Y = currentU.evaluateOn(X);
-  plotXYSeries(chebpointSeries, X, Y);
-}
-
 void HeatDemonstrator::plotCurrentU() {
   Vector X = xt::linspace(-1.0, 1.0, N_LINSPACE_POINTS_TO_PLOT);
   Vector Y = currentU.evaluateOn(X);
   plotXYSeries(temperatureSeries, X, Y);
+}
+
+void HeatDemonstrator::plotChebpoints() {
+  Vector X = TschebFun::modifiedChebpoints(currentU.order());
+  Vector Y = currentU.evaluateOn(X);
+  plotXYSeries(chebpointSeries, X, Y);
 }
 
 void HeatDemonstrator::plotXYSeries(QXYSeries *series, Vector X, Vector Y) {

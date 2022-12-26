@@ -15,4 +15,5 @@ class TschebFun {
   Vector evaluateOn(Vector x);
   static TschebFun interpolantThrough(Vector y);
   static Vector chebpoints(size_t N);
+  static Vector modifiedChebpoints(size_t N);
 };
