@@ -2,7 +2,7 @@
 
 #define max(a, b) (a > b) ? a : b
 static const double pi = xt::numeric_constants<double>::PI;
-static const double epsilon = 1e-14;
+static const double epsilon = 1e-13;
 
 void print(std::string text, Vector x) {
   std::cout << text << ": ";

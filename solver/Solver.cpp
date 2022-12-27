@@ -24,7 +24,6 @@ void HeatSolver::forceBoundaryConditions() {
   Vector fixed_coefficients = xt::view(currentU.coefficients, xt::range(0, degree - 2));
   double sigma_1 = xt::sum(xt::pow((double)-1, xt::arange(degree - 2)) * fixed_coefficients)();
   double sigma_2 = xt::sum(fixed_coefficients)();
-  // TODO: optimise sigma_1 + sigma_2 (terms will cancel)
   if (degree % 2 == 1) { // odd degree
     currentU.coefficients[degree - 1] = (left_bc + right_bc - sigma_1 - sigma_2) / 2.0;
     currentU.coefficients[degree] = right_bc - currentU.coefficients[degree - 1] - sigma_2;

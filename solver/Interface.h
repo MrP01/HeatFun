@@ -31,6 +31,7 @@ class HeatDemonstrator : public HeatSolver, public QMainWindow {
 
   QLineEdit *expressionLineEdit = new QLineEdit();
   QSpinBox *orderEdit = new QSpinBox();
+  QLineEdit *dtEdit = new QLineEdit();
   QPushButton *controlBtn = new QPushButton("Start");
   QPushButton *stepBtn = new QPushButton("Step");
   QPushButton *differentiationBtn = new QPushButton("Differentiate");

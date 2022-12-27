@@ -64,7 +64,9 @@ void HeatDemonstrator::buildUI() {
   temperatureChart->addSeries(chebpointSeries);
   temperatureChart->addSeries(u0Series);
   temperatureChart->createDefaultAxes();
-  temperatureChart->axes(Qt::Horizontal).first()->setRange(-1.05, 1.05);
+  temperatureChart->axes(Qt::Horizontal).first()->setTitleText("Location x");
+  temperatureChart->axes(Qt::Vertical).first()->setTitleText("Temperature u(x)");
+  temperatureChart->axes(Qt::Horizontal).first()->setRange(-1.0, 1.0);
   QChartView *temperatureView = new QChartView(temperatureChart);
 
   expressionLineEdit->setPlaceholderText("Enter Expression for u_0(x)");
@@ -83,6 +85,14 @@ void HeatDemonstrator::buildUI() {
   orderEdit->setMaximum(2000);
   orderEdit->setValue(30);
   orderEdit->setMaximumWidth(200);
+
+  dtEdit->setPlaceholderText("dt");
+  dtEdit->setText(QString::number(dt, 'e'));
+  dtEdit->setMaximumWidth(200);
+  connect(dtEdit, &QLineEdit::returnPressed, [=, this]() {
+    dt = dtEdit->text().toDouble();
+    std::cout << "Set dt = " << dt << std::endl;
+  });
 
   connect(differentiationBtn, &QPushButton::clicked, [=, this]() {
     currentU = currentU.derivative();
@@ -105,6 +115,7 @@ void HeatDemonstrator::buildUI() {
   auto topLayout = new QHBoxLayout();
   topLayout->addWidget(expressionLineEdit);
   topLayout->addWidget(orderEdit);
+  topLayout->addWidget(dtEdit);
   auto buttonLayout = new QHBoxLayout();
   buttonLayout->addWidget(controlBtn);
   buttonLayout->addWidget(stepBtn);

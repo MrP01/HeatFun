@@ -6,7 +6,7 @@
 class HeatSolver {
  protected:
   double alpha = 1.0;
-  double dt = 1e-4;
+  double dt = 1e-5;
   double left_bc = 0;
   double right_bc = 0;
   TschebFun currentU = TschebFun(1);
