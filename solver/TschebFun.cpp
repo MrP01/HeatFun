@@ -1,6 +1,4 @@
 #include "TschebFun.h"
-#include <xtensor/xindex_view.hpp>
-#include <xtensor/xview.hpp>
 
 #define max(a, b) (a > b) ? a : b
 static const double pi = xt::numeric_constants<double>::PI;

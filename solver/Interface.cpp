@@ -20,7 +20,7 @@ void HeatDemonstrator::plotAndLoadU0Expression(std::string expression) {
   Vector X = xt::linspace(-1.0, 1.0, N_LINSPACE_POINTS_TO_PLOT);
   try {
     Vector Y = evaluateExpression(expression, X);
-    plotXYSeries(u0Series, X, Y);
+    plotXYSeries(u0Series, X, Y, true);
   } catch (mup::ParserError) {
     std::cout << "Could not parse expression" << std::endl;
   }
@@ -43,11 +43,12 @@ void HeatDemonstrator::plotChebpoints() {
   plotXYSeries(chebpointSeries, X, Y);
 }
 
-void HeatDemonstrator::plotXYSeries(QXYSeries *series, Vector X, Vector Y) {
+void HeatDemonstrator::plotXYSeries(QXYSeries *series, Vector X, Vector Y, bool adaptYAxis) {
   series->clear();
   for (size_t i = 0; i < X.size(); i++)
     series->append(X[i], Y[i]);
-  temperatureChart->axes(Qt::Vertical).first()->setRange(xt::amin(Y)() - 0.1, xt::amax(Y)() + 0.1);
+  if (adaptYAxis)
+    temperatureChart->axes(Qt::Vertical).first()->setRange(xt::amin(Y)() - 0.1, xt::amax(Y)() + 0.1);
 }
 
 std::string HeatDemonstrator::getExpression() {
@@ -63,7 +64,7 @@ void HeatDemonstrator::buildUI() {
   temperatureChart->addSeries(chebpointSeries);
   temperatureChart->addSeries(u0Series);
   temperatureChart->createDefaultAxes();
-  temperatureChart->axes(Qt::Horizontal).first()->setRange(-1, 1);
+  temperatureChart->axes(Qt::Horizontal).first()->setRange(-1.05, 1.05);
   QChartView *temperatureView = new QChartView(temperatureChart);
 
   expressionLineEdit->setPlaceholderText("Enter Expression for u_0(x)");
@@ -90,7 +91,7 @@ void HeatDemonstrator::buildUI() {
   connect(stepBtn, &QPushButton::clicked, [=, this]() { step(); });
   connect(controlBtn, &QPushButton::clicked, [=, this]() {
     if (controlBtn->text() == "Start") {
-      _timerId = startTimer(100);
+      _timerId = startTimer(50);
       _start_step = _step;
       controlBtn->setText("Stop");
     } else {

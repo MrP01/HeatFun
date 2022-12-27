@@ -1,6 +1,8 @@
 #pragma once
 
 #include <xtensor/xarray.hpp>
+#include <xtensor/xindex_view.hpp>
+#include <xtensor/xview.hpp>
 
 typedef xt::xarray<double> Vector;
 

@@ -47,7 +47,7 @@ class HeatDemonstrator : public HeatSolver, public QMainWindow {
 
   void plotChebpoints();
   void plotCurrentU();
-  void plotXYSeries(QXYSeries *series, Vector X, Vector Y);
+  void plotXYSeries(QXYSeries *series, Vector X, Vector Y, bool adaptYAxis = false);
 
   // very important:
   QComboBox *createThemeChooser();
