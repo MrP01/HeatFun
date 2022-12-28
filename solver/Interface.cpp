@@ -27,7 +27,8 @@ void HeatDemonstrator::plotAndLoadU0Expression(std::string expression) {
 }
 
 void HeatDemonstrator::step() {
-  iterate();
+  for (size_t i = 0; i < STEPS_PER_FRAME; i++)
+    iterate();
   plotCurrentU();
 }
 
@@ -70,9 +71,9 @@ void HeatDemonstrator::buildUI() {
   temperatureChart->axes(Qt::Horizontal).first()->setRange(-1.0, 1.0);
   QChartView *temperatureView = new QChartView(temperatureChart);
 
-  QLabel *expressionLabel = new QLabel("&Initial Condition:", this);
+  QLabel *expressionLabel = new QLabel("&Initial condition:", this);
   expressionLabel->setBuddy(expressionLineEdit);
-  expressionLineEdit->setPlaceholderText("Enter Expression for u_0(x)");
+  expressionLineEdit->setPlaceholderText("Enter expression for u_0(x)");
   expressionLineEdit->setMaximumWidth(200);
   connect(expressionLineEdit, &QLineEdit::returnPressed, [=, this]() { setupExpression(getExpression()); });
   connect(orderEdit, &QSpinBox::valueChanged, [=, this]() { setupExpression(getExpression()); });
@@ -92,7 +93,7 @@ void HeatDemonstrator::buildUI() {
   orderEdit->setValue(30);
   orderEdit->setMaximumWidth(200);
 
-  QLabel *dtLabel = new QLabel("&Timestep dt:", this);
+  QLabel *dtLabel = new QLabel("&Time-step dt:", this);
   dtLabel->setBuddy(dtEdit);
   dtEdit->setPlaceholderText("dt");
   dtEdit->setText(QString::number(dt, 'e'));
@@ -133,10 +134,17 @@ void HeatDemonstrator::buildUI() {
       controlBtn->setText("Start");
     }
   });
+  connect(reinitBtn, &QPushButton::clicked, [=, this]() { setupExpression(getExpression()); });
+  connect(exportBtn, &QPushButton::clicked, [=, this]() {
+    std::ofstream out_file("/tmp/heat-state.csv");
+    xt::dump_csv(out_file, xt::atleast_2d(currentU.evaluateOn(xt::linspace(-1.0, 1.0, N_LINSPACE_POINTS_TO_PLOT))));
+    std::cout << "Exported u(x) in its current state to /tmp/heat-state.csv" << std::endl;
+  });
 
   auto mainWidget = new QWidget(this);
   auto mainLayout = new QGridLayout(mainWidget);
   auto sideLayout = new QVBoxLayout();
+  sideLayout->addSpacing(5);
   sideLayout->addWidget(expressionLabel);
   sideLayout->addWidget(expressionLineEdit);
   sideLayout->addSpacing(5);

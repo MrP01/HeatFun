@@ -5,6 +5,10 @@ description = "Heat Equation Solver"
 authors = ["MrP01 <peter@waldert.at>"]
 readme = "README.md"
 
+[tool.poetry.dependencies]
+python = ">=3.8"
+numpy = "^1.24.1"
+
 [tool.poetry.group.dev.dependencies]
 invoke = "^1.7.3"
 

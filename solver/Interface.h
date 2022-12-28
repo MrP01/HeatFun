@@ -16,8 +16,10 @@
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QScatterSeries>
+#include <fstream>
+#include <xtensor/xcsv.hpp>
 
-#define STEPS_PER_FRAME 4 // number of timesteps per frame, TODO
+#define STEPS_PER_FRAME 12 // number of timesteps per frame, TODO
 
 class HeatDemonstrator : public HeatSolver, public QMainWindow {
  private:
@@ -33,11 +35,11 @@ class HeatDemonstrator : public HeatSolver, public QMainWindow {
   QPushButton *controlBtn = new QPushButton("Start");
   QPushButton *stepBtn = new QPushButton("Step");
   QPushButton *differentiationBtn = new QPushButton("Differentiate");
-  QPushButton *reinitBtn = new QPushButton("Re-init");
+  QPushButton *reinitBtn = new QPushButton("Reset");
   QPushButton *exportBtn = new QPushButton("Export");
-  QCheckBox *showChebpoints = new QCheckBox("Show Chebpoints");
+  QCheckBox *showChebpoints = new QCheckBox("Show chebpoints");
   QCheckBox *adaptiveDtCheckBox = new QCheckBox("Adaptive time-step");
-  QCheckBox *linearMultistepCheckBox = new QCheckBox("Linear Multistep method");
+  QCheckBox *linearMultistepCheckBox = new QCheckBox("Linear multistep method");
   QLabel *statsLabel = new QLabel("Heat");
 
   size_t _step = 0;

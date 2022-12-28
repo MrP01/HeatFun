@@ -1,8 +1,23 @@
+#include "Solver.h"
+#include "pybind11_xarray.hpp"
+#include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
+#include <xtensor/xadapt.hpp>
 
-int add(int i, int j) { return i + j; }
+namespace py = pybind11;
+
+Vector modifiedChebpoints(size_t N) { return TschebFun::modifiedChebpoints(N); }
+
+Vector solve(Vector u0, double T, Vector x) {
+  HeatSolver solver{};
+  solver.setup(u0);
+  for (size_t i = 0; i < (size_t)(T / solver.dt); i++)
+    solver.iterate();
+  return solver.currentU.evaluateOn(x);
+}
 
 PYBIND11_MODULE(heatfun, m) {
   m.doc() = "HeatFun - taking care of your heat equation solver needs";
-  m.def("add", &add, "A function that adds two numbers");
+  m.def("modifiedChebpoints", &modifiedChebpoints, "Returns the modified chebpoints required for sampling.");
+  m.def("solve", &solve, "Solve the heat equation given initial condition u0(x) and time t.");
 }

@@ -10,7 +10,7 @@ struct Optimisations {
 };
 
 class HeatSolver {
- protected:
+ public:
   double alpha = 1.0;
   double dt = 1e-5;
   double left_bc = 0;
