@@ -5,9 +5,11 @@ static const double pi = xt::numeric_constants<double>::PI;
 static const double epsilon = 1e-13;
 
 void print(std::string text, Vector x) {
+#ifndef SILENT
   std::cout << text << ": ";
   std::copy(x.begin(), x.end(), std::ostream_iterator<float>(std::cout, ", "));
   std::cout << std::endl;
+#endif
 }
 
 TschebFun::TschebFun(Vector coeffs) : coefficients(coeffs) {
@@ -55,7 +57,6 @@ TschebFun TschebFun::derivative() {
   if (n > 1)
     derivative[1] = 4 * coeffs[2];
   derivative[0] = coeffs[1];
-  print("Derivative coeffs:", derivative);
   return TschebFun(derivative);
 }
 
