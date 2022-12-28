@@ -60,6 +60,7 @@ void HeatDemonstrator::buildUI() {
   temperatureSeries->setName("Temperature u(x)");
   chebpointSeries->setName("Chebpoints");
   u0Series->setName("u_0(x)");
+  u0Series->setColor(Qt::gray);
   temperatureChart->addSeries(temperatureSeries);
   temperatureChart->addSeries(chebpointSeries);
   temperatureChart->addSeries(u0Series);
@@ -69,10 +70,15 @@ void HeatDemonstrator::buildUI() {
   temperatureChart->axes(Qt::Horizontal).first()->setRange(-1.0, 1.0);
   QChartView *temperatureView = new QChartView(temperatureChart);
 
+  QLabel *expressionLabel = new QLabel("&Initial Condition:", this);
+  expressionLabel->setBuddy(expressionLineEdit);
   expressionLineEdit->setPlaceholderText("Enter Expression for u_0(x)");
+  expressionLineEdit->setMaximumWidth(200);
   connect(expressionLineEdit, &QLineEdit::returnPressed, [=, this]() { setupExpression(getExpression()); });
   connect(orderEdit, &QSpinBox::valueChanged, [=, this]() { setupExpression(getExpression()); });
 
+  QLabel *orderLabel = new QLabel("&Order of interpolation:", this);
+  orderLabel->setBuddy(orderEdit);
   connect(showChebpoints, &QCheckBox::stateChanged, [=, this]() {
     if (showChebpoints->isChecked()) {
       if (chebpointSeries->points().size() == 0)
@@ -86,12 +92,30 @@ void HeatDemonstrator::buildUI() {
   orderEdit->setValue(30);
   orderEdit->setMaximumWidth(200);
 
+  QLabel *dtLabel = new QLabel("&Timestep dt:", this);
+  dtLabel->setBuddy(dtEdit);
   dtEdit->setPlaceholderText("dt");
   dtEdit->setText(QString::number(dt, 'e'));
   dtEdit->setMaximumWidth(200);
   connect(dtEdit, &QLineEdit::returnPressed, [=, this]() {
     dt = dtEdit->text().toDouble();
     std::cout << "Set dt = " << dt << std::endl;
+  });
+
+  QLabel *goalDuLabel = new QLabel("&Adaptive goal du:", this);
+  goalDuLabel->setBuddy(goalDuEdit);
+  goalDuEdit->setPlaceholderText("du");
+  goalDuEdit->setText(QString::number(optimisations.adaptiveGoalDu, 'e'));
+  goalDuEdit->setMaximumWidth(200);
+  connect(dtEdit, &QLineEdit::returnPressed, [=, this]() {
+    optimisations.adaptiveGoalDu = goalDuEdit->text().toDouble();
+    std::cout << "Set goalDu = " << optimisations.adaptiveGoalDu << std::endl;
+  });
+  goalDuEdit->setDisabled(true);
+
+  connect(adaptiveDtCheckBox, &QCheckBox::stateChanged, [=, this]() {
+    optimisations.adaptiveDt = adaptiveDtCheckBox->isChecked();
+    goalDuEdit->setEnabled(optimisations.adaptiveDt);
   });
 
   connect(differentiationBtn, &QPushButton::clicked, [=, this]() {
@@ -112,21 +136,31 @@ void HeatDemonstrator::buildUI() {
 
   auto mainWidget = new QWidget(this);
   auto mainLayout = new QGridLayout(mainWidget);
-  auto topLayout = new QHBoxLayout();
-  topLayout->addWidget(expressionLineEdit);
-  topLayout->addWidget(orderEdit);
-  topLayout->addWidget(dtEdit);
-  auto buttonLayout = new QHBoxLayout();
-  buttonLayout->addWidget(controlBtn);
-  buttonLayout->addWidget(stepBtn);
-  buttonLayout->addWidget(differentiationBtn);
-  buttonLayout->addWidget(reinitBtn);
-  buttonLayout->addWidget(exportBtn);
-  buttonLayout->addWidget(createThemeChooser());
-  buttonLayout->addWidget(showChebpoints);
-  mainLayout->addLayout(topLayout, 0, 0);
-  mainLayout->addWidget(temperatureView, 1, 0);
-  mainLayout->addLayout(buttonLayout, 2, 0);
+  auto sideLayout = new QVBoxLayout();
+  sideLayout->addWidget(expressionLabel);
+  sideLayout->addWidget(expressionLineEdit);
+  sideLayout->addSpacing(5);
+  sideLayout->addWidget(orderLabel);
+  sideLayout->addWidget(orderEdit);
+  sideLayout->addWidget(showChebpoints);
+  sideLayout->addSpacing(5);
+  sideLayout->addWidget(dtLabel);
+  sideLayout->addWidget(dtEdit);
+  sideLayout->addSpacing(5);
+  sideLayout->addWidget(adaptiveDtCheckBox);
+  sideLayout->addWidget(goalDuLabel);
+  sideLayout->addWidget(goalDuEdit);
+  sideLayout->addSpacing(5);
+  sideLayout->addWidget(linearMultistepCheckBox);
+  sideLayout->addWidget(controlBtn);
+  sideLayout->addWidget(stepBtn);
+  sideLayout->addWidget(differentiationBtn);
+  sideLayout->addWidget(reinitBtn);
+  sideLayout->addWidget(exportBtn);
+  sideLayout->addWidget(createThemeChooser());
+  sideLayout->addStretch();
+  mainLayout->addWidget(temperatureView, 0, 0);
+  mainLayout->addLayout(sideLayout, 0, 1);
   setCentralWidget(mainWidget);
   setWindowTitle("Spectral Heat Equation Solver");
 

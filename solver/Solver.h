@@ -3,6 +3,12 @@
 #include "TschebFun.h"
 #include <muparserx/mpParser.h>
 
+struct Optimisations {
+  bool adaptiveDt = false;
+  double adaptiveGoalDu = 1e-2;
+  bool linearMultistep = false;
+};
+
 class HeatSolver {
  protected:
   double alpha = 1.0;
@@ -10,6 +16,8 @@ class HeatSolver {
   double left_bc = 0;
   double right_bc = 0;
   TschebFun currentU = TschebFun(1);
+
+  struct Optimisations optimisations;
 
  public:
   HeatSolver();

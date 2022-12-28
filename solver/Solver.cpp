@@ -14,8 +14,15 @@ void HeatSolver::setup(Vector u0) {
 
 void HeatSolver::iterate() {
   // base step, leaves two degrees of freedom a_{N}, a_{N-1}
-  currentU = currentU - currentU.derivative().derivative() * (dt * alpha);
+  TschebFun previousU = currentU;
+  currentU = previousU - previousU.derivative().derivative() * (dt * alpha);
   forceBoundaryConditions();
+
+  if (optimisations.adaptiveDt) {
+    double change = xt::sum(xt::abs(currentU.coefficients - previousU.coefficients))();
+    dt *= pow(optimisations.adaptiveGoalDu / change, 0.2);
+    std::cout << "dt: " << dt << std::endl;
+  }
 }
 
 void HeatSolver::forceBoundaryConditions() {
