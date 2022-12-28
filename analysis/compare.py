@@ -1,8 +1,9 @@
 import pathlib
+import subprocess
 import sys
 
-import matplotlib.pyplot as plt
 import matplotlib.axes
+import matplotlib.pyplot as plt
 import numpy as np
 
 BASE = pathlib.Path(__file__).parent.parent
@@ -21,6 +22,7 @@ def heatfun_solution():
 
 
 def matlab_solution():
+    subprocess.run(["matlab", "-nodisplay", "-nosplash", "-nodesktop", "-r", "run('heatfun.m'); exit;"])
     solution = np.loadtxt(BASE / "analysis" / "matlab.csv", dtype=np.double)
     return solution
 

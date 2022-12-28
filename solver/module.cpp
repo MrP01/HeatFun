@@ -11,7 +11,7 @@ Vector modifiedChebpoints(size_t N) { return TschebFun::modifiedChebpoints(N); }
 Vector solve(Vector u0, double T, Vector x) {
   HeatSolver solver{};
   solver.setup(u0);
-  for (size_t i = 0; i < (size_t)(T / solver.dt); i++)
+  for (size_t i = 0; i <= (size_t)(T / solver.dt); i++)
     solver.iterate();
   return solver.currentU.evaluateOn(x);
 }
