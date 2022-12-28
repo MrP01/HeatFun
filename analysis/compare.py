@@ -8,7 +8,7 @@ import numpy as np
 BASE = pathlib.Path(__file__).parent.parent
 RESULTS = BASE / "report" / "images"
 sys.path.append(str(BASE / "build" / "lib"))
-import heatfun  # ignore
+import heatfun  # type: ignore  # noqa
 
 
 def analyse():
