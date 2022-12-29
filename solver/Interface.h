@@ -40,7 +40,7 @@ class HeatDemonstrator : public HeatSolver, public QMainWindow {
   QCheckBox *showChebpoints = new QCheckBox("Show chebpoints");
   QCheckBox *adaptiveDtCheckBox = new QCheckBox("Adaptive time-step");
   QCheckBox *linearMultistepCheckBox = new QCheckBox("Linear multistep method");
-  QLabel *statsLabel = new QLabel("Heat");
+  QLabel *statsLabel = new QLabel("Press 'Start' to get going!");
 
   size_t _step = 0;
   size_t _start_step = 0;

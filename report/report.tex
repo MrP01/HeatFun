@@ -12,6 +12,7 @@
 \usepackage{prettytex/math-theorems}
 \usepackage{prettytex/mathematicians}
 \usepackage{prettytex/gfx}
+\usepackage{prettytex/code}
 \usepackage{prettytex/thesis}
 \usepackage{cleveref}
 \usepackage{lipsum}
@@ -55,6 +56,7 @@
 \begin{document}
   \pagestyle{plain}
   \begin{center}
+    \vspace*{-2.5cm}
     \Large \topictitle \\
     \vspace{.3cm}
 
@@ -64,20 +66,33 @@
   \end{center}
 
   \begin{abstract}
-    Partial differential equations are notoriously hard to solve. One more possible approach to make way in this important class of problems is by the technique of spectral methods, incidentally closely related to finite element methods.
-    The key idea is to perform the problem solution by representation of the occurring functions in a certain basis.
-    For non-periodic problem settings, \textsc{Chebyshev} series are a fantastic choice.
+    This work shall attempt to numerically solve the heat equation $u_t = \alpha u_{xx}$ with Dirichlet boundary conditions over the domain $[-1, 1] \times [0, T]$ by representing the spatial component as a \textit{Chebfun} (Chebyshev series) and moving on in time by the Forward Euler method.
 
-    This work shall attempt to numerically solve the heat equation $u_t = \alpha u_{xx}$ with Dirichlet boundary conditions over the domain $[-1, 1] \times [0, T]$ by representing the spatial component as a \textit{ChebFun} (Chebyshev series) and moving on in time by the Forward Euler method.
+    The implementation, centered around what we will refer to as \textbf{\textcolor{themecolor3}{TschebFun}}, including three major algorithms \texttt{\textcolor{themecolor3}{TschebFun}::\textcolor{themecolor2}{interpolantThrough}()}, \texttt{\textcolor{themecolor3}{TschebFun}::\textcolor{themecolor2}{evaluateOn}()} and \texttt{\textcolor{themecolor3}{TschebFun}::\textcolor{themecolor2}{derivative}()}, is done manually in C++, extended to work as a Python module and for demonstration, even features a high-level graphical interface to play with.
+    Finally, we will compare the numerical results with the output of \textit{Chebfun}'s high-level \texttt{pde15s()}.
   \end{abstract}
 
   \textbf{Goal:}
-  Numerically find the solution of
+  Numerically obtain the solution $u(x, T)$ of
   $$\begin{cases}
-      \frac{\partial u}{\partial t} = \alpha \frac{\partial^2 u}{\partial x^2} \quad & u: [-1, 1] \times [0, T] \mapsto \R,\, T \in \R^+,\, \alpha \in \R\backslash\{0\} \\
-      u(x_j, 0) = u_0(x_j) \quad                                                     & \forall x_j \in X_N,\, N \in \N \text{ with } N > 1, \; u_0: [-1, 1] \mapsto \R   \\
-      u(b, t) = u_0(b)                                                               & \forall b \in \{-1, 1\},\, t \in [0, T] \,.
+      \frac{\partial u}{\partial t} = \alpha \frac{\partial^2 u}{\partial x^2} \quad & u: [-1, 1] \times [0, T] \mapsto \R,\, T \in \R^+,\; \alpha \in \R\backslash\{0\} \\
+      u(x_j, 0) = u_0(x_j) \quad                                                     & \forall x_j \in X_N,\; N \in \N,\, N > 1, \; u_0: [-1, 1] \mapsto \R              \\
+      u(b, t) = u_0(b)                                                               & \forall b \in \{-1, 1\},\; \forall t \in [0, T] \,.
     \end{cases}$$
+
+  \begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{figures/screenshot.png}
+    \caption{Screenshot of the graphical user interface}
+  \end{figure}
+
+  \pagebreak
+  \pagestyle{normal}
+
+  \section{Motivation}
+  Partial differential equations are notoriously hard to solve. One more possible approach to make way in this important class of problems is by the technique of spectral methods, incidentally closely related to finite element methods.
+  The key idea is to perform the problem solution by representation of the occurring functions in a certain basis.
+  For non-periodic problem settings, \textsc{Chebyshev} series are a fantastic choice.
 
   \section{Chebyshev and why we like his polynomials}
   Let $\N$ denote the nonnegative integers, so $0 \in \N$.
@@ -105,7 +120,6 @@
                              & = \frac{1}{2} (z^{k+1} + z^{-(k+1)}) = T_{k+1}(x)
     \end{align*}
   \end{proof}
-  \pagestyle{normal}
 
   The Chebyshev polynomials also satisfy an \emph{orthogonality relation},
   $$\langle T_m, T_n \rangle := \int_{-1}^1 T_m(x) T_n(x) \frac{1}{\sqrt{1-x^2}} \ddx = \int_{\pi}^{0} \cos(m \theta) \cos(n \theta) \frac{-\sin(\theta)}{\sqrt{1-\cos^2(\theta)}} \dd\theta \,,$$
@@ -175,6 +189,8 @@
     \inputtikz{chebpoints}
     \caption{The Chebyshev points $\{x_j = \cos(\theta_j)\}$ are projections of the equispaced points $\{\theta_j\}$ on the unit circle onto the x-axis.}
   \end{figure}
+
+  \inputminted{cpp}{../solver/TschebFun.h}
 
   One way of forcing the boundary conditions, at least the first that came to my mind when thinking of this issue, is to pin down the two highest-order coefficients in the series representation.
 

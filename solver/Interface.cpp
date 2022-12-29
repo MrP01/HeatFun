@@ -3,6 +3,7 @@
 // TODO: potentially implement drag-and-drop functionality of u0 with the mouse
 
 #define N_LINSPACE_POINTS_TO_PLOT 500
+#define SIDE_PANEL_MAX_WIDTH 250
 static QChart::ChartTheme THEMES[5] = {QChart::ChartThemeLight, QChart::ChartThemeDark, QChart::ChartThemeBlueCerulean,
     QChart::ChartThemeBrownSand, QChart::ChartThemeBlueIcy};
 
@@ -32,6 +33,7 @@ void HeatDemonstrator::step() {
   for (size_t i = 0; i < STEPS_PER_FRAME; i++)
     iterate();
   plotCurrentU();
+  statsLabel->setText(QString("Current time: t = %1\nTime-step dt = %2").arg(totalTime).arg(dt));
 }
 
 void HeatDemonstrator::plotCurrentU() {
@@ -73,10 +75,10 @@ void HeatDemonstrator::buildUI() {
   temperatureChart->axes(Qt::Horizontal).first()->setRange(-1.0, 1.0);
   QChartView *temperatureView = new QChartView(temperatureChart);
 
-  QLabel *expressionLabel = new QLabel("&Initial condition:", this);
+  QLabel *expressionLabel = new QLabel("&Initial condition u_0(x):", this);
   expressionLabel->setBuddy(expressionLineEdit);
   expressionLineEdit->setPlaceholderText("Enter expression for u_0(x)");
-  expressionLineEdit->setMaximumWidth(200);
+  expressionLineEdit->setMaximumWidth(SIDE_PANEL_MAX_WIDTH);
   connect(expressionLineEdit, &QLineEdit::returnPressed, [=, this]() { setupExpression(getExpression()); });
   connect(orderEdit, &QSpinBox::valueChanged, [=, this]() { setupExpression(getExpression()); });
 
@@ -93,13 +95,13 @@ void HeatDemonstrator::buildUI() {
   orderEdit->setMinimum(1);
   orderEdit->setMaximum(2000);
   orderEdit->setValue(30);
-  orderEdit->setMaximumWidth(200);
+  orderEdit->setMaximumWidth(SIDE_PANEL_MAX_WIDTH);
 
   QLabel *dtLabel = new QLabel("&Time-step dt:", this);
   dtLabel->setBuddy(dtEdit);
   dtEdit->setPlaceholderText("dt");
   dtEdit->setText(QString::number(dt, 'e'));
-  dtEdit->setMaximumWidth(200);
+  dtEdit->setMaximumWidth(SIDE_PANEL_MAX_WIDTH);
   connect(dtEdit, &QLineEdit::returnPressed, [=, this]() {
     dt = dtEdit->text().toDouble();
     std::cout << "Set dt = " << dt << std::endl;
@@ -109,7 +111,7 @@ void HeatDemonstrator::buildUI() {
   goalDuLabel->setBuddy(goalDuEdit);
   goalDuEdit->setPlaceholderText("du");
   goalDuEdit->setText(QString::number(optimisations.adaptiveGoalDu, 'e'));
-  goalDuEdit->setMaximumWidth(200);
+  goalDuEdit->setMaximumWidth(SIDE_PANEL_MAX_WIDTH);
   connect(dtEdit, &QLineEdit::returnPressed, [=, this]() {
     optimisations.adaptiveGoalDu = goalDuEdit->text().toDouble();
     std::cout << "Set goalDu = " << optimisations.adaptiveGoalDu << std::endl;
@@ -168,6 +170,8 @@ void HeatDemonstrator::buildUI() {
   sideLayout->addWidget(reinitBtn);
   sideLayout->addWidget(exportBtn);
   sideLayout->addWidget(createThemeChooser());
+  sideLayout->addSpacing(5);
+  sideLayout->addWidget(statsLabel);
   sideLayout->addStretch();
   mainLayout->addWidget(temperatureView, 0, 0);
   mainLayout->addLayout(sideLayout, 0, 1);

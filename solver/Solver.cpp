@@ -17,6 +17,7 @@ void HeatSolver::iterate() {
   TschebFun previousU = currentU;
   currentU = previousU - previousU.derivative().derivative() * (dt * alpha);
   forceBoundaryConditions();
+  totalTime += dt;
 
   if (optimisations.adaptiveDt) {
     double change = xt::sum(xt::abs(currentU.coefficients - previousU.coefficients))();
