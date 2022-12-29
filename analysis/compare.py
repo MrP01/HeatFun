@@ -36,18 +36,21 @@ def analyse():
 
     plt.style.use("ggplot")
     fig = plt.figure()
-    axes: matplotlib.axes.Axes = fig.add_subplot(1, 1, 1)
-    axes.plot(x_to_plot, u0(x_to_plot), label="$u_0(x)$")
+    axes: matplotlib.axes.Axes = fig.add_subplot(2, 1, 1)
+    axes.plot(x_to_plot, u0(x_to_plot), label="$u(x, 0) = u_0(x)$")
     axes.plot(x_to_plot, our_solution, label="$u_{heatfun}(x, T)$")
     axes.plot(x_to_plot, chebfun_solution, label="$u_{chebfun}(x, T)$")
-    axes.set_xlabel("$x$")
     axes.set_ylabel("$u(x)$")
     axes.legend()
+    axes: matplotlib.axes.Axes = fig.add_subplot(2, 1, 2)
+    axes.semilogy(x_to_plot, abs(our_solution - chebfun_solution), "m")
+    axes.set_xlabel("$x$")
+    axes.set_ylabel("$|u_{heat}(x, T) - u_{cheb}(x, T)|$")
     tikzplotlib.save(
         RESULTS / "numerical-comparison.tex",
         figure=fig,
         axis_width=r"0.8\linewidth",
-        axis_height=r"0.45\linewidth",
+        axis_height=r"0.4\linewidth",
     )
     fig.savefig(str(RESULTS / "numerical-comparison.png"))
     plt.show()
