@@ -161,7 +161,7 @@ void HeatDemonstrator::buildUI() {
   sideLayout->addWidget(goalDuLabel);
   sideLayout->addWidget(goalDuEdit);
   sideLayout->addSpacing(5);
-  sideLayout->addWidget(linearMultistepCheckBox);
+  // sideLayout->addWidget(linearMultistepCheckBox);
   sideLayout->addWidget(controlBtn);
   sideLayout->addWidget(stepBtn);
   sideLayout->addWidget(differentiationBtn);

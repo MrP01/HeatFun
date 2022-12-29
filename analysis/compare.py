@@ -5,9 +5,10 @@ import sys
 import matplotlib.axes
 import matplotlib.pyplot as plt
 import numpy as np
+import tikzplotlib
 
 BASE = pathlib.Path(__file__).parent.parent
-RESULTS = BASE / "report" / "images"
+RESULTS = BASE / "report" / "figures"
 sys.path.append(str(BASE / "build" / "lib"))
 import heatfun  # type: ignore  # noqa
 
@@ -21,8 +22,9 @@ def heatfun_solution():
     return solution
 
 
-def matlab_solution():
-    subprocess.run(["matlab", "-nodisplay", "-nosplash", "-nodesktop", "-r", "run('heatfun.m'); exit;"])
+def matlab_solution(reevaluate=False):
+    if reevaluate:
+        subprocess.run(["matlab", "-nodisplay", "-nosplash", "-nodesktop", "-r", "run('heatfun.m'); exit;"])
     solution = np.loadtxt(BASE / "analysis" / "matlab.csv", dtype=np.double)
     return solution
 
@@ -32,6 +34,7 @@ def analyse():
     chebfun_solution = matlab_solution()
     print("Squared error:", sum((our_solution - chebfun_solution) ** 2))
 
+    plt.style.use("ggplot")
     fig = plt.figure()
     axes: matplotlib.axes.Axes = fig.add_subplot(1, 1, 1)
     axes.plot(x_to_plot, u0(x_to_plot), label="$u_0(x)$")
@@ -40,7 +43,13 @@ def analyse():
     axes.set_xlabel("$x$")
     axes.set_ylabel("$u(x)$")
     axes.legend()
-    fig.savefig(str(RESULTS / "plot.png"))
+    tikzplotlib.save(
+        RESULTS / "numerical-comparison.tex",
+        figure=fig,
+        axis_width=r"0.8\linewidth",
+        axis_height=r"0.45\linewidth",
+    )
+    fig.savefig(str(RESULTS / "numerical-comparison.png"))
     plt.show()
 
 

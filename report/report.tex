@@ -1,17 +1,25 @@
 \documentclass[12pt, a4paper]{article}
 \PassOptionsToPackage{sharp}{prettytex/boxes}
 \usepackage{prettytex/base}
-\usepackage{prettytex/math}
-\usepackage{prettytex/math-theorems}
-\usepackage{prettytex/mathematicians}
-\usepackage{cleveref}
-\usepackage{lipsum}
 
 \setlength{\topmargin}{0.0in}
 \setlength{\oddsidemargin}{0.33in}
 \setlength{\textheight}{9.0in}
 \setlength{\textwidth}{6.0in}
 \renewcommand{\baselinestretch}{1.25}
+
+\usepackage{prettytex/math}
+\usepackage{prettytex/math-theorems}
+\usepackage{prettytex/mathematicians}
+\usepackage{prettytex/gfx}
+\usepackage{prettytex/thesis}
+\usepackage{cleveref}
+\usepackage{lipsum}
+
+\setlength{\headheight}{19.53pt}
+\setlength{\headsep}{1.8em}
+\setlength{\belowcaptionskip}{-12pt}
+\addbibresource{sources.bib}
 
 \newcommand{\topictitle}{Solving PDEs using Spectral Methods in the Chebyshev basis \\ \large by example of the Heat Equation}
 \newcommand{\candidatenumber}{12345}
@@ -45,6 +53,7 @@
 % Results
 
 \begin{document}
+  \pagestyle{plain}
   \begin{center}
     \Large \topictitle \\
     \vspace{.3cm}
@@ -85,6 +94,7 @@
                              & = \frac{1}{2} (z^{k+1} + z^{-(k+1)}) = T_{k+1}(x)
     \end{align*}
   \end{proof}
+  \pagestyle{normal}
 
   The Chebyshev polynomials also satisfy an \emph{orthogonality relation},
   $$\langle T_m, T_n \rangle := \int_{-1}^1 T_m(x) T_n(x) \frac{1}{\sqrt{1-x^2}} \ddx = \int_{\pi}^{0} \cos(m \theta) \cos(n \theta) \frac{-\sin(\theta)}{\sqrt{1-\cos^2(\theta)}} \dd\theta \,,$$
@@ -121,11 +131,12 @@
     a_k & = \frac{2}{\pi} \langle f, T_k \rangle = \frac{2}{\pi} \int_0^\pi f(\cos \theta) \cos(k \theta) \dd\theta, \quad k \neq 0 \,.
   \end{align*}
   Dealing with a numerical problem, we shall approximate the above two integrals by the rectangular integral rule.
+  Another proof for the explicit coefficient integrals can be found in \cite{atap}.
 
   \begin{theorem}{Rectangular integral rule}{integralapprox}
     $$\int_a^b f(x) \ddx = \lim_{N \rightarrow \infty} \frac{b-a}{N} \sum_{k=0}^N f(x_k), \quad x_k := a + \frac{b-a}{N} k$$
   \end{theorem}
-  % TODO: cite Bonthuis lecture notes
+  \cite[128]{bonthuis-cp}
 
   Most importantly, this quadrature-style integral approximation is only one way of numerically determining the coefficients $a_k$.
   Another is to recognise the structure of the above integral for $k \neq 0$ as a cosine transform of the function $(f \circ \cos)$.
@@ -136,7 +147,7 @@
   \begin{definition}{Discrete Cosine Transform}{dct}
   \end{definition}
 
-  Most significantly, this approach via the Discrete Cosine Transform can be sped up by means of the \emph{Fast Fourier Transform}. % TODO: cite original FFT publication
+  Most significantly, this approach via the Discrete Cosine Transform can be sped up by means of the \emph{Fast Fourier Transform} \parencite{cooley-tukey-fft}.
 
   Numerically speaking, a significant improvement to these two approaches can be made by using the \emph{Barycentric interpolation formula in Chebyshev points}.
 
@@ -152,7 +163,15 @@
   \section{The heat equation and its solution}
   \section{Differentiation}
   \section{Results}
+  \begin{figure}[H]
+    \centering
+    \inputtikz{numerical-comparison}
+    \caption{Comparison of heatfun and chebfun}
+  \end{figure}
+
   \section{Discussion}
+
+  \printbibliography
 
   \appendix
   \section{Title of Appendix}

@@ -9,6 +9,7 @@ readme = "README.md"
 python = ">=3.8"
 numpy = "^1.24.1"
 matplotlib = "^3.6.2"
+tikzplotlib = "^0.10.1"
 
 [tool.poetry.group.dev.dependencies]
 invoke = "^1.7.3"
