@@ -17,12 +17,10 @@ problem solution by representation of the occurring functions in a certain basis
 non-periodic problem settings, Chebyshev series are a fantastic choice.
 
 This work shall attempt to numerically solve the heat equation ut = αuxx
-with Dirichlet boundary conditions over the domain [−1, 1] × [0, T] by repre-
-senting the spatial component as a Chebfun (Chebyshev series) and moving on
+with Dirichlet boundary conditions over the domain [−1, 1] × [0, T] by representing the spatial component as a Chebfun (Chebyshev series) and moving on
 in time by the Forward Euler numerical scheme.
 
-The implementation, centered around what we will refer to as Tscheb-
-Fun, including three major algorithms TschebFun::interpolantThrough(),
+The implementation, centered around what we will refer to as TschebFun, including three major algorithms TschebFun::interpolantThrough(),
 TschebFun::evaluateOn() and TschebFun::derivative(), is done manually
 in C++, extended to work as a Python module and for demonstration, even
 features a high-level graphical interface to play with. Finally, we will compare

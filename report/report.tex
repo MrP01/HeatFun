@@ -13,6 +13,7 @@
 \usepackage{prettytex/mathematicians}
 \usepackage{prettytex/gfx}
 \usepackage{prettytex/code}
+\usepackage{prettytex/pseudo}
 \usepackage{prettytex/thesis}
 \usepackage{cleveref}
 \usepackage{lipsum}
@@ -172,6 +173,18 @@
   \end{theorem}
   \cite[128]{bonthuis-cp}
 
+  \begin{minted}{cpp}
+TschebFun TschebFun::interpolantThrough(Vector y) {
+  int order = y.size(), degree = order - 1;
+  Vector j = (xt::linspace((double)degree, 0.0, order) + 0.5) * (pi / order);
+  Vector coeffs = xt::zeros_like(y); // as many coefficients as data points
+  coeffs[0] = xt::sum(y)() / order;
+  for (size_t k = 1; k < order; k++)
+    coeffs[k] = (2.0 / order) * xt::sum(y * xt::cos(j * k))();
+  return TschebFun(coeffs);
+}
+  \end{minted}
+
   Most importantly, this quadrature-style integral approximation is only one way of numerically determining the coefficients $a_k$.
   Another is to recognise the structure of the above integral for $k \neq 0$ as a cosine transform of the function $(f \circ \cos)$.
 
@@ -201,11 +214,88 @@
 
   \inputminted{cpp}{../solver/TschebFun.h}
 
-  One way of forcing the boundary conditions, at least the first that came to my mind when thinking of this issue, is to pin down the two highest-order coefficients in the series representation.
+  \section{The spectral method}
+  Differentiation matrix $D_N$ according to \cite{spectralmethods}.
+
+  \begin{align*}
+    \vec{a}^{(t+dt)} = \vec{a}^{(t)} - \alpha \Delta t \cdot D_N^2 \vec{a}^{(t)}
+  \end{align*}
+
+  \subsection{Enforcing boundary conditions}
+  One way of forcing the boundary conditions, at least the first that came to my mind when thinking of this issue, is to pin down the two highest-order coefficients in the series representation after the iteration.
+
+  Let $l := u_0(-1)$, $r := u_0(1)$.
+  Recognise that
+  \begin{align*}
+    T_k(-1) & = T_k(\cos \pi) = \cos(k \pi) = (-1)^k \\
+    T_k(1)  & = T_k(\cos 0) = \cos(k 0) = 1
+  \end{align*}
+  which leads to
+  \begin{align*}
+    u(-1, t) & = \sum_{k=0}^{N-1} a_k^{(t)} T_k(-1) & = & \overbrace{\sum_{k=0}^{N-3} a_k^{(t)} (-1)^k}^{:= \Sigma_1} & + & (-1)^{N-2} a_{N-2} & + & (-1)^{N-1} a_{N-1} & = l \\
+    u(1, t)  & = \sum_{k=0}^{N-1} a_k^{(t)} T_k(1)  & = & \underbrace{\sum_{k=0}^{N-3} a_k^{(t)}}_{:= \Sigma_2}       & + & a_{N-2}            & + & a_{N-1}            & = r
+  \end{align*}
+  By adding up the above two equations, one obtains
+  \begin{equation}
+    \Sigma_1 + \Sigma_2 + \underbrace{\left((-1)^{N-2} + 1\right)}_{\in \{0, 2\}} a_{N-2} + \underbrace{\left((-1)^{N-1} + 1\right)}_{\in \{0, 2\}} a_{N-1} = l + r \label{eq:boundary-equation}
+  \end{equation}
+
+  For $N$ even: \autoref{eq:boundary-equation} has one unkown $a_{N-2} = \frac{l+r-\Sigma_1-\Sigma_2}{2},\; a_{N-1} = r - a_{N-2} - \Sigma_2$.
+
+  For $N$ odd: \autoref{eq:boundary-equation} has one unkown $a_{N-1} = \frac{l+r-\Sigma_1-\Sigma_2}{2},\; a_{N-2} = r - a_{N-1} - \Sigma_2$.
+
+  \subsection{Clenshaw Algorithm}
+  \begin{theorem}{Clenshaw recurrence relation}{clenshaw-recurrence}
+  \end{theorem}
+  \parencite[172-178]{art-of-sci-comp}.
+
+  \begin{minted}{cpp}
+Vector TschebFun::evaluateOn(Vector x) {
+  Vector U_kp2;
+  Vector U_kp1 = xt::zeros_like(x);
+  Vector U_k = xt::ones_like(x) * coefficients[coefficients.size() - 1];
+  for (int k = coefficients.size() - 2; k >= 0; k--) {
+    U_kp2 = U_kp1;
+    U_kp1 = U_k;
+    U_k = 2.0 * x * U_kp1 - U_kp2 + coefficients[k];
+  }
+  return (U_k - U_kp2 + coefficients[0]) / 2.0;
+}
+  \end{minted}
 
   \section{The heat equation and its solution}
   \section{Differentiation}
+  \begin{minted}{cpp}
+TschebFun TschebFun::derivative() {
+  int n = coefficients.size();
+  n = n - 1; // differentiation reduces the degree (order) by 1
+  Vector coeffs = coefficients; // make a copy
+  Vector derivative = xt::zeros<double>({n});
+  for (size_t j = n; j > 2; j--) {
+    derivative[j - 1] = (2 * j) * coeffs[j];
+    coeffs[j - 2] += (j * coeffs[j]) / (j - 2);
+  }
+  if (n > 1)
+    derivative[1] = 4 * coeffs[2];
+  derivative[0] = coeffs[1];
+  return TschebFun(derivative);
+}
+  \end{minted}
+
+  \subsection{Extension to a Python module}
+  Using \texttt{pybind11}.
+
+  \begin{minted}{python}
+import heatfun
+u0 = lambda x: np.exp(-(x**2) * 12)
+x_to_plot = np.linspace(-1.0, 1.0, 500)
+cheb_x = heatfun.modifiedChebpoints(30)
+solution = heatfun.solve(u0(cheb_x), 0.01, x_to_plot)
+  \end{minted}
+
   \section{Results}
+  \inputminted{matlab}{../analysis/heatfun.m}
+
   \begin{figure}[H]
     \centering
     \inputtikz{numerical-comparison}
