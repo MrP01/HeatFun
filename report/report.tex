@@ -31,14 +31,14 @@
 
 % Outline:
 % Setting: define heat equation PDE problem (with BCs), explain series in x direction
-% Introduce Chebyshev polynomials (relation of x, z and theta)
-% Prove recurrence relation
-% Prove orthogonality
-% - Using transformation to theta
-% - cite Cauchy integral for Laurent series
-% Define Lipschitz
+% ✅ Introduce Chebyshev polynomials (relation of x, z and theta)
+% ✅ Prove recurrence relation
+% ✅ Prove orthogonality
+% ✅ - Using transformation to theta
+% ✅ - cite Cauchy integral for Laurent series
+% ✅ Define Lipschitz
 % Define Function Space in Cheb Basis
-% Introduce Cheb series
+% ✅ Introduce Cheb series
 % Algorithm one: interpolantThrough()
 % - Method one: Rectangular integral approx. rule
 % - Method two: DCT
@@ -64,15 +64,26 @@
   \end{center}
 
   \begin{abstract}
-    Insert some waffle here if you want. Abstracts are optional for
-    special topics but are part of page count.
+    Partial differential equations are notoriously hard to solve. One more possible approach to make way in this important class of problems is by the technique of spectral methods, incidentally closely related to finite element methods.
+    The key idea is to perform the problem solution by representation of the occurring functions in a certain basis.
+    For non-periodic problem settings, \textsc{Chebyshev} series are a fantastic choice.
+
+    This work shall attempt to numerically solve the heat equation $u_t = \alpha u_{xx}$ with Dirichlet boundary conditions over the domain $[-1, 1] \times [0, T]$ by representing the spatial component as a \textit{ChebFun} (Chebyshev series) and moving on in time by the Forward Euler method.
   \end{abstract}
 
-  \section{Introduction}
+  \textbf{Goal:}
+  Numerically find the solution of
+  $$\begin{cases}
+      \frac{\partial u}{\partial t} = \alpha \frac{\partial^2 u}{\partial x^2} \quad & u: [-1, 1] \times [0, T] \mapsto \R,\, T \in \R^+,\, \alpha \in \R\backslash\{0\} \\
+      u(x_j, 0) = u_0(x_j) \quad                                                     & \forall x_j \in X_N,\, N \in \N \text{ with } N > 1, \; u_0: [-1, 1] \mapsto \R   \\
+      u(b, t) = u_0(b)                                                               & \forall b \in \{-1, 1\},\, t \in [0, T] \,.
+    \end{cases}$$
+
+  \section{Chebyshev and why we like his polynomials}
   Let $\N$ denote the nonnegative integers, so $0 \in \N$.
 
   \begin{definition}{Chebyshev polynomial}{chebpoly}
-    Chebyshev\footnote{named after Pafnuty Lvovich \textsc{Chebyshev}, alternatively transliterated as Tchebycheff, Tchebyshev (French) or Tschebyschow (German)} polynomials $T_k: \R \mapsto \R$ are functions satisfying
+    Chebyshev\footnote{named after Pafnuty Lvovich \textsc{Chebyshev}, alternatively transliterated as Tchebycheff, Tchebyshev (French) or \textsc{Tschebyschow} (German)} polynomials $T_k: \R \mapsto \R$ are functions satisfying
     \begin{align*}
       T_k(x) = T_k(\cos \theta) := \cos(k \theta) = \frac{1}{2} (z^k + z^{-k}) \\
       z := \e^{i \theta},\quad x := \Re(z) = \cos(\theta) = \frac{1}{2}(z + z^{-1})
@@ -80,7 +91,7 @@
     for $k \in \N$. Then, $T_0(x) = 1$, $T_1(x) = x$, $T_2(x) = 2x^2-1$, and so on.
   \end{definition}
 
-  These relations between $x$, $z$ and $\theta$ reveal fundamental connections between three famous basis sets (as we will confirm later): \textsc{Chebyshev}, \textsc{Legendre} and \textsc{Fourier}.
+  These relations between $x$, $z$ and $\theta$ reveal fundamental connections between three famous basis sets (as we will confirm later): \textsc{Chebyshev}, \textsc{Laurent} and \textsc{Fourier}.
 
   \begin{theorem}{Chebyshev Recursion Formula}{chebrecursion}
     The Chebyshev polyomials satisfy the three-term recurrence relation $$T_{k+1}(x) = 2x T_k(x) - T_{k-1}(x) \,.$$
@@ -149,13 +160,14 @@
 
   Most significantly, this approach via the Discrete Cosine Transform can be sped up by means of the \emph{Fast Fourier Transform} \parencite{cooley-tukey-fft}.
 
-  Numerically speaking, a significant improvement to these two approaches can be made by using the \emph{Barycentric interpolation formula in Chebyshev points}.
+  Numerically speaking, a significant improvement to these two approaches can be made by using the \emph{Barycentric interpolation formula in Chebyshev points} \parencite{atap}.
+  Given more time, one should implement this feature in TschebFun as well.
 
   \begin{definition}{Chebyshev points}{chebpoints}
     From the equispaced points
-    $$\Theta := \{\theta_j := jN/\pi \;|\; j = 0, ..., N\} \,,$$
+    $$\Theta_N := \{\theta_j := jN/\pi \;|\; j = 0, ..., N\} \,,$$
     we can further define the Chebyshev points as the corresponding $\cos(\theta_j)$,
-    $$X := \{x_j := \cos(\theta_j) \;|\; \theta_j \in \Theta\} \,.$$
+    $$X_N := \{x_j := \cos(\theta_j) \;|\; \theta_j \in \Theta_N\} \,.$$
   \end{definition}
 
   \begin{figure}[H]
