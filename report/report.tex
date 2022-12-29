@@ -66,24 +66,28 @@
   \end{center}
 
   \begin{abstract}
-    This work shall attempt to numerically solve the heat equation $u_t = \alpha u_{xx}$ with Dirichlet boundary conditions over the domain $[-1, 1] \times [0, T]$ by representing the spatial component as a \textit{Chebfun} (Chebyshev series) and moving on in time by the Forward Euler method.
+    This work shall attempt to numerically solve the heat equation $u_t = \alpha u_{xx}$ with Dirichlet boundary conditions over the domain $[-1, 1] \times [0, T]$ by representing the spatial component as a \textit{Chebfun} (Chebyshev series) and moving on in time by the Forward Euler numerical scheme.
+    \vspace*{0.2cm}
+
+    \noindent
+    \textbf{Our Goal:}
+    Numerically obtain the solution $u(x, T)$ of
+    \vspace*{-0.2cm}
+    $$\begin{cases}
+        \frac{\partial u}{\partial t} = \alpha \frac{\partial^2 u}{\partial x^2} \quad & u: [-1, 1] \times [0, T] \mapsto \R,\, T \in \R^+,\; \alpha \in \R\backslash\{0\} \\
+        u(x_j, 0) = u_0(x_j) \quad                                                     & \forall x_j \in X_N,\; N \in \N,\, N > 1, \; u_0: [-1, 1] \mapsto \R              \\
+        u(b, t) = u_0(b)                                                               & \forall b \in \{-1, 1\},\; \forall t \in (0, T] \,.
+      \end{cases}$$
+    \vspace*{0.05cm}
 
     The implementation, centered around what we will refer to as \textbf{\textcolor{themecolor3}{TschebFun}}, including three major algorithms \texttt{\textcolor{themecolor3}{TschebFun}::\textcolor{themecolor2}{interpolantThrough}()}, \texttt{\textcolor{themecolor3}{TschebFun}::\textcolor{themecolor2}{evaluateOn}()} and \texttt{\textcolor{themecolor3}{TschebFun}::\textcolor{themecolor2}{derivative}()}, is done manually in C++, extended to work as a Python module and for demonstration, even features a high-level graphical interface to play with.
     Finally, we will compare the numerical results with the output of \textit{Chebfun}'s high-level \texttt{pde15s()}.
   \end{abstract}
 
-  \textbf{Goal:}
-  Numerically obtain the solution $u(x, T)$ of
-  $$\begin{cases}
-      \frac{\partial u}{\partial t} = \alpha \frac{\partial^2 u}{\partial x^2} \quad & u: [-1, 1] \times [0, T] \mapsto \R,\, T \in \R^+,\; \alpha \in \R\backslash\{0\} \\
-      u(x_j, 0) = u_0(x_j) \quad                                                     & \forall x_j \in X_N,\; N \in \N,\, N > 1, \; u_0: [-1, 1] \mapsto \R              \\
-      u(b, t) = u_0(b)                                                               & \forall b \in \{-1, 1\},\; \forall t \in [0, T] \,.
-    \end{cases}$$
-
   \begin{figure}[H]
     \centering
-    \includegraphics[width=0.8\linewidth]{figures/screenshot.png}
-    \caption{Screenshot of the graphical user interface}
+    \includegraphics[width=\linewidth]{figures/screenshot.png}
+    \caption{Screenshot of the graphical user interface. After entering an initial expression $u_0(x)$, depicted in grey, the simulation will run upon pressing 'Start'. The solution at time $t$, depicted in blue, is represented as a Chebyshev series of degree 29.}
   \end{figure}
 
   \pagebreak
