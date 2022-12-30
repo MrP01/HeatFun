@@ -40,7 +40,6 @@ def all_matlab_solutions():
             f"u0 = chebfun(func, {ORDER_OF_INTERPOLATION}); "
             "run('heatfun.m'); "
         )
-    print(command)
     subprocess.run(
         ["matlab", "-nodisplay", "-nosplash", "-nodesktop", "-r", f"{command}exit;"],
         cwd=BASE / "analysis",
@@ -55,7 +54,7 @@ def matlab_solution(example_key: str):
 def analyse(example_key: str):
     our_solution = heatfun_solution(example_key)
     chebfun_solution = matlab_solution(example_key)
-    print("Squared error:", sum((our_solution - chebfun_solution) ** 2))
+    print(example_key, "squared error:", sum((our_solution - chebfun_solution) ** 2))
 
     fig = plt.figure()
     axes: matplotlib.axes.Axes = fig.add_subplot(2, 1, 1)
@@ -79,6 +78,6 @@ def analyse(example_key: str):
 
 if __name__ == "__main__":
     all_matlab_solutions()
-    # for key in INTERESTING_U0.keys():
-    #     analyse(key)
-    # plt.show()
+    for key in INTERESTING_U0.keys():
+        analyse(key)
+    plt.show()
