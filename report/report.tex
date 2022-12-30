@@ -75,8 +75,8 @@
     Numerically obtain the solution $u(x, T)$ of
     \vspace*{-0.2cm}
     $$\begin{cases}
-        \frac{\partial u}{\partial t} = \alpha \frac{\partial^2 u}{\partial x^2} \quad & u: [-1, 1] \times [0, T] \mapsto \R,\, T \in \R^+,\; \alpha \in \R\backslash\{0\} \\
-        u(x_j, 0) = u_0(x_j) \quad                                                     & \forall x_j \in X_N,\; N \in \N,\, N > 1, \; u_0: [-1, 1] \mapsto \R              \\
+        \frac{\partial u}{\partial t} = \alpha \frac{\partial^2 u}{\partial x^2} \quad & u: [-1, 1] \times [0, T] \mapsto \R,\, T \in \R^+,\; \alpha \in \R^+ \\
+        u(x_j, 0) = u_0(x_j) \quad                                                     & \forall x_j \in X_N,\; N \in \N,\, N > 1, \; u_0: [-1, 1] \mapsto \R \\
         u(b, t) = u_0(b)                                                               & \forall b \in \{-1, 1\},\; \forall t \in (0, T] \,.
       \end{cases}$$
     \vspace*{0.05cm}
@@ -99,7 +99,7 @@
   The key idea is to perform the problem solution by representation of the occurring functions in a certain basis.
   For non-periodic problem settings, \textsc{Chebyshev} series are a fantastic choice.
 
-  \section{Chebyshev and why we like his polynomials}
+  \section{Background}
   Let $\N$ denote the nonnegative integers, so $0 \in \N$.
 
   \begin{definition}{Chebyshev polynomial}{chebpoly}
@@ -155,17 +155,24 @@
                                  a_l \pi/2 & \text{ for } l \neq 0
                                \end{cases}
   \end{align*}
-  which can easily be rearranged to give explicit relations for $a_0$ and $a_k$
-  \begin{align*}
-    a_0 & = \frac{1}{\pi} \langle f, T_0 \rangle =  \frac{1}{\pi} \int_0^\pi f(\cos \theta) \dd\theta                                   \\
-    a_k & = \frac{2}{\pi} \langle f, T_k \rangle = \frac{2}{\pi} \int_0^\pi f(\cos \theta) \cos(k \theta) \dd\theta, \quad k \neq 0 \,.
-  \end{align*}
-  Dealing with a numerical problem, we shall approximate the above two integrals by the rectangular integral rule.
-  A different approach for the derivation of the explicit coefficient integrals can be found in \cite{atap} along with a complex analysis styled proof.
+  which can easily be rearranged to give explicit relations for $a_0$ and $a_k$, summarised in the below theorem.
+  \begin{theorem}{Chebyshev series coefficient formula}{cheb-coefficient-integrals}
+    For any $f \in \cC_L$, one can obtain the Chebyshev series coefficients $a_k$, $k \in \N$ as
+    \begin{align*}
+      a_0 & = \frac{1}{\pi} \langle f, T_0 \rangle =  \frac{1}{\pi} \int_0^\pi f(\cos \theta) \dd\theta                                   \\
+      a_k & = \frac{2}{\pi} \langle f, T_k \rangle = \frac{2}{\pi} \int_0^\pi f(\cos \theta) \cos(k \theta) \dd\theta, \quad k \neq 0 \,.
+    \end{align*}
+  \end{theorem}
+  \begin{proof}
+    As given in the discussion above.
+    A different approach for the derivation of the explicit coefficient integrals can be found in \cite{atap} along with a complex analysis styled proof.
+  \end{proof}
+
+  Dealing with a numerical problem, we shall later approximate the above two integrals by the rectangular integral rule.
 
   As computers rarely allow us to store infinitely many coefficients $a_k$, we will work with the truncated Chebyshev series
   $$f_N(x) = \sum_{k=0}^{N-1} a_k T_k(x), \quad k \in \{0, ..., N\},\quad N \in \N, N > 1$$
-  which approximates the function with a degree $N-1$ polynomial up to
+  which approximates the function $f$ with a degree $N-1$ polynomial up to an error
   $$f(x) - f_N(x) = \sum_{k=0}^{\infty} a_k T_k(x) - \sum_{k=0}^{N-1} a_k T_k(x) = \sum_{k=N}^{\infty} a_k T_k(x) \,.$$
 
   \begin{theorem}{Rectangular integral rule}{integralapprox}
@@ -174,15 +181,15 @@
   \cite[128]{bonthuis-cp}
 
   \begin{minted}{cpp}
-TschebFun TschebFun::interpolantThrough(Vector y) {
-  int order = y.size(), degree = order - 1;
-  Vector j = (xt::linspace((double)degree, 0.0, order) + 0.5) * (pi / order);
-  Vector coeffs = xt::zeros_like(y); // as many coefficients as data points
-  coeffs[0] = xt::sum(y)() / order;
-  for (size_t k = 1; k < order; k++)
-    coeffs[k] = (2.0 / order) * xt::sum(y * xt::cos(j * k))();
-  return TschebFun(coeffs);
-}
+    TschebFun TschebFun::interpolantThrough(Vector y) {
+      int order = y.size(), degree = order - 1;
+      Vector j = (xt::linspace((double)degree, 0.0, order) + 0.5) * (pi / order);
+      Vector coeffs = xt::zeros_like(y); // as many coefficients as data points
+      coeffs[0] = xt::sum(y)() / order;
+      for (size_t k = 1; k < order; k++)
+        coeffs[k] = (2.0 / order) * xt::sum(y * xt::cos(j * k))();
+      return TschebFun(coeffs);
+    }
   \end{minted}
 
   Most importantly, this quadrature-style integral approximation is only one way of numerically determining the coefficients $a_k$.
@@ -201,7 +208,7 @@ TschebFun TschebFun::interpolantThrough(Vector y) {
 
   \begin{definition}{Chebyshev points}{chebpoints}
     From the equispaced points
-    $$\Theta_N := \{\theta_j := jN/\pi \;|\; j = 0, ..., N\} \,,$$
+    $$\Theta_N := \{\theta_j := j\pi/N \;|\; j = 0, ..., N\} \,,$$
     we can further define the Chebyshev points as the corresponding $\cos(\theta_j)$,
     $$X_N := \{x_j := \cos(\theta_j) \;|\; \theta_j \in \Theta_N\} \,.$$
   \end{definition}
@@ -214,7 +221,34 @@ TschebFun TschebFun::interpolantThrough(Vector y) {
 
   \inputminted{cpp}{../solver/TschebFun.h}
 
+  Cannot use normal chebpoints in this interpolation method, because ...
+  \begin{definition}{Modified Chebyshev points}{mod-chebpoints}
+    $$\Theta_N := \{\theta_j := \frac{(j + 0.5)\pi}{N} \;|\; j = 0, ..., N\} \,,$$
+    $$X_N := \{x_j := \cos(\theta_j) \;|\; \theta_j \in \Theta_N\} \,.$$
+  \end{definition}
+
+  \section{The heat equation and its solution}
+  Using the separation Ansatz, ...
+
   \section{The spectral method}
+
+  \begin{minted}{cpp}
+    TschebFun TschebFun::derivative() {
+      int n = coefficients.size();
+      n = n - 1; // differentiation reduces the degree (order) by 1
+      Vector coeffs = coefficients; // make a copy
+      Vector derivative = xt::zeros<double>({n});
+      for (size_t j = n; j > 2; j--) {
+        derivative[j - 1] = (2 * j) * coeffs[j];
+        coeffs[j - 2] += (j * coeffs[j]) / (j - 2);
+      }
+      if (n > 1)
+        derivative[1] = 4 * coeffs[2];
+      derivative[0] = coeffs[1];
+      return TschebFun(derivative);
+    }
+  \end{minted}
+
   Differentiation matrix $D_N$ according to \cite{spectralmethods}.
 
   \begin{align*}
@@ -244,53 +278,40 @@ TschebFun TschebFun::interpolantThrough(Vector y) {
 
   For $N$ odd: \autoref{eq:boundary-equation} has one unkown $a_{N-1} = \frac{l+r-\Sigma_1-\Sigma_2}{2},\; a_{N-2} = r - a_{N-1} - \Sigma_2$.
 
+  Adaptive time-steps.
+
+  \begin{algorithm}[language=pseudo,caption={Heat Equation Forward-Euler}]
+    currentU = currentU - $\alpha \Delta t$
+  \end{algorithm}
+
   \subsection{Clenshaw Algorithm}
   \begin{theorem}{Clenshaw recurrence relation}{clenshaw-recurrence}
   \end{theorem}
   \parencite[172-178]{art-of-sci-comp}.
 
   \begin{minted}{cpp}
-Vector TschebFun::evaluateOn(Vector x) {
-  Vector U_kp2;
-  Vector U_kp1 = xt::zeros_like(x);
-  Vector U_k = xt::ones_like(x) * coefficients[coefficients.size() - 1];
-  for (int k = coefficients.size() - 2; k >= 0; k--) {
-    U_kp2 = U_kp1;
-    U_kp1 = U_k;
-    U_k = 2.0 * x * U_kp1 - U_kp2 + coefficients[k];
-  }
-  return (U_k - U_kp2 + coefficients[0]) / 2.0;
-}
-  \end{minted}
-
-  \section{The heat equation and its solution}
-  \section{Differentiation}
-  \begin{minted}{cpp}
-TschebFun TschebFun::derivative() {
-  int n = coefficients.size();
-  n = n - 1; // differentiation reduces the degree (order) by 1
-  Vector coeffs = coefficients; // make a copy
-  Vector derivative = xt::zeros<double>({n});
-  for (size_t j = n; j > 2; j--) {
-    derivative[j - 1] = (2 * j) * coeffs[j];
-    coeffs[j - 2] += (j * coeffs[j]) / (j - 2);
-  }
-  if (n > 1)
-    derivative[1] = 4 * coeffs[2];
-  derivative[0] = coeffs[1];
-  return TschebFun(derivative);
-}
+    Vector TschebFun::evaluateOn(Vector x) {
+      Vector U_kp2;
+      Vector U_kp1 = xt::zeros_like(x);
+      Vector U_k = xt::ones_like(x) * coefficients[coefficients.size() - 1];
+      for (int k = coefficients.size() - 2; k >= 0; k--) {
+        U_kp2 = U_kp1;
+        U_kp1 = U_k;
+        U_k = 2.0 * x * U_kp1 - U_kp2 + coefficients[k];
+      }
+      return (U_k - U_kp2 + coefficients[0]) / 2.0;
+    }
   \end{minted}
 
   \subsection{Extension to a Python module}
   Using \texttt{pybind11}.
 
   \begin{minted}{python}
-import heatfun
-u0 = lambda x: np.exp(-(x**2) * 12)
-x_to_plot = np.linspace(-1.0, 1.0, 500)
-cheb_x = heatfun.modifiedChebpoints(30)
-solution = heatfun.solve(u0(cheb_x), 0.01, x_to_plot)
+    import heatfun, numpy as np
+    u0 = lambda x: np.exp(-12 * x**2)
+    x_of_interest = np.linspace(-1.0, 1.0, 500)
+    cheb_x = heatfun.modifiedChebpoints(30)
+    solution = heatfun.solve(u0(cheb_x), 0.01, x_of_interest)
   \end{minted}
 
   \section{Results}

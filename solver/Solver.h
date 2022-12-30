@@ -11,7 +11,7 @@ struct Optimisations {
 
 class HeatSolver {
  public:
-  double alpha = 1.0; // TODO: can we acccept negative alpha?
+  double alpha = 1.0;
   double dt = 1e-5;
   double left_bc = 0;
   double right_bc = 0;
