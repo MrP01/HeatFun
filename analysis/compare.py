@@ -13,30 +13,38 @@ sys.path.append(str(BASE / "build" / "lib"))
 import heatfun  # type: ignore  # noqa
 
 INTERESTING_U0 = {
-    "gaussian": "exp(-12 * x^2)",
+    "gaussian": "exp(-12*x^2)",
     "sines": "sin((4*x)^2) + sin(4*x)^2",
     "radiation": "1/(x^2+0.05)",
     "tanh-kernel": "tanh(-10*x^4)",
     "double-tanh": "tanh(10*(x+0.5))-tanh(10*(x-0.5))",
 }
 X_TO_PLOT = np.linspace(-1.0, 1.0, 500)
+ORDER_OF_INTERPOLATION = 30
 
 # plt.style.use("ggplot")
 
 
 def heatfun_solution(example_key: str):
-    cheb_x = heatfun.modifiedChebpoints(30)
+    cheb_x = heatfun.modifiedChebpoints(ORDER_OF_INTERPOLATION)
     cheb_y = heatfun.evaluateExpression(INTERESTING_U0[example_key], cheb_x)
     solution = heatfun.solve(cheb_y, 0.01, X_TO_PLOT)
     return solution
 
 
 def all_matlab_solutions():
-    matlab_command = ""
+    command = ""
     for key, func in INTERESTING_U0.items():
-        matlab_command += f"filename = 'matlab-result-{key}.csv'; u0 = chebfun('{func}'); run('heatfun.m'); "
-    print(matlab_command)
-    subprocess.run(["matlab", "-nodisplay", "-nosplash", "-nodesktop", "-r", matlab_command + "exit;"], cwd="analysis")
+        command += (
+            f"filename = 'matlab-result-{key}.csv'; func = '{func}'; disp(func); "
+            f"u0 = chebfun(func, {ORDER_OF_INTERPOLATION}); "
+            "run('heatfun.m'); "
+        )
+    print(command)
+    subprocess.run(
+        ["matlab", "-nodisplay", "-nosplash", "-nodesktop", "-r", f"{command}exit;"],
+        cwd=BASE / "analysis",
+    )
 
 
 def matlab_solution(example_key: str):
@@ -67,10 +75,10 @@ def analyse(example_key: str):
         axis_height=r"0.4\linewidth",
     )
     fig.savefig(str(RESULTS / f"comparison-{example_key}.png"))
-    plt.show()
 
 
 if __name__ == "__main__":
-    # all_matlab_solutions()
-    for key in INTERESTING_U0.keys():
-        analyse(key)
+    all_matlab_solutions()
+    # for key in INTERESTING_U0.keys():
+    #     analyse(key)
+    # plt.show()
