@@ -13,7 +13,7 @@ sys.path.append(str(BASE / "build" / "lib"))
 import heatfun  # type: ignore  # noqa
 
 INTERESTING_U0 = {
-    "gaussian": "exp(-12 * x**2)",
+    "gaussian": "exp(-12 * x^2)",
     "sines": "sin((4*x)^2) + sin(4*x)^2",
     "radiation": "1/(x^2+0.05)",
     "tanh-kernel": "tanh(-10*x^4)",
@@ -31,16 +31,22 @@ def heatfun_solution(example_key: str):
     return solution
 
 
-def matlab_solution(reevaluate=False):
-    if reevaluate:
-        subprocess.run(["matlab", "-nodisplay", "-nosplash", "-nodesktop", "-r", "run('heatfun.m'); exit;"])
-    solution = np.loadtxt(BASE / "analysis" / "matlab.csv", dtype=np.double)
+def all_matlab_solutions():
+    matlab_command = ""
+    for key, func in INTERESTING_U0.items():
+        matlab_command += f"filename = 'matlab-result-{key}.csv'; u0 = chebfun('{func}'); run('heatfun.m'); "
+    print(matlab_command)
+    subprocess.run(["matlab", "-nodisplay", "-nosplash", "-nodesktop", "-r", matlab_command + "exit;"], cwd="analysis")
+
+
+def matlab_solution(example_key: str):
+    solution = np.loadtxt(BASE / "analysis" / f"matlab-result-{example_key}.csv", dtype=np.double)
     return solution
 
 
 def analyse(example_key: str):
     our_solution = heatfun_solution(example_key)
-    chebfun_solution = matlab_solution()
+    chebfun_solution = matlab_solution(example_key)
     print("Squared error:", sum((our_solution - chebfun_solution) ** 2))
 
     fig = plt.figure()
@@ -55,14 +61,16 @@ def analyse(example_key: str):
     axes.set_xlabel("$x$")
     axes.set_ylabel("$|u_{heat}(x, T) - u_{cheb}(x, T)|$")
     tikzplotlib.save(
-        RESULTS / "numerical-comparison.tex",
+        RESULTS / f"comparison-{example_key}.tex",
         figure=fig,
         axis_width=r"0.8\linewidth",
         axis_height=r"0.4\linewidth",
     )
-    fig.savefig(str(RESULTS / "numerical-comparison.png"))
+    fig.savefig(str(RESULTS / f"comparison-{example_key}.png"))
     plt.show()
 
 
 if __name__ == "__main__":
-    analyse("gaussian")
+    # all_matlab_solutions()
+    for key in INTERESTING_U0.keys():
+        analyse(key)
