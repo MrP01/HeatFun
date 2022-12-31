@@ -14,6 +14,7 @@
 \usepackage{prettytex/gfx}
 \usepackage{prettytex/code}
 \usepackage{prettytex/pseudo}
+\usepackage{prettytex/todo}
 \usepackage{prettytex/thesis}
 \usepackage{cleveref}
 \usepackage{lipsum}
@@ -32,7 +33,7 @@
 \date{\today}
 
 % Outline:
-% Setting: define heat equation PDE problem (with BCs), explain series in x direction
+% ✅ Setting: define heat equation PDE problem (with BCs), explain series in x direction
 % ✅ Introduce Chebyshev polynomials (relation of x, z and theta)
 % ✅ Prove recurrence relation
 % ✅ Prove orthogonality
@@ -94,12 +95,20 @@
   \pagebreak
   \pagestyle{normal}
 
+  \tableofcontents
+  \pagebreak
+
   \section{Motivation}
   Partial differential equations are notoriously hard to solve. One more possible approach to make way in this important class of problems is by the technique of spectral methods, incidentally closely related to finite element methods.
   The key idea is to perform the problem solution by representation of the occurring functions in a certain basis.
   For non-periodic problem settings, \textsc{Chebyshev} series are a fantastic choice.
 
-  \section{Background}
+  \subsection{The heat equation and its solution}
+  Using the separation Ansatz
+  $$u(x, t) = X(x) T(t), \quad X: [-1, 1] \mapsto \R, \quad T: [0, T] \mapsto \R$$
+  \todo{elaborate}
+
+  \section{Chebyshev Interpolation}
   Let $\N$ denote the nonnegative integers, so $0 \in \N$.
 
   \begin{definition}{Chebyshev polynomial}{chebpoly}
@@ -112,6 +121,7 @@
   \end{definition}
 
   These relations between $x$, $z$ and $\theta$ reveal fundamental connections between three famous basis sets (as we will confirm later): \textsc{Chebyshev}, \textsc{Laurent} and \textsc{Fourier}.
+  \todo{elaborate}
 
   \begin{theorem}{Chebyshev Recursion Formula}{chebrecursion}
     The Chebyshev polyomials satisfy the three-term recurrence relation $$T_{k+1}(x) = 2x T_k(x) - T_{k-1}(x) \,.$$
@@ -126,6 +136,7 @@
     \end{align*}
   \end{proof}
 
+  \subsection{An Orthogonal Basis}
   The Chebyshev polynomials also satisfy an \emph{orthogonality relation},
   $$\langle T_m, T_n \rangle := \int_{-1}^1 T_m(x) T_n(x) \frac{1}{\sqrt{1-x^2}} \ddx = \int_{\pi}^{0} \cos(m \theta) \cos(n \theta) \frac{-\sin(\theta)}{\sqrt{1-\cos^2(\theta)}} \dd\theta \,,$$
   which becomes, with the fitting substitution $x = \cos(\theta)$ and $\ddx = -\sin(\theta) \dd\theta$,
@@ -140,6 +151,7 @@
       \pi   & \text{ for } m = n = 0
     \end{cases}$$
   which can be effectively utilised to define a function space $(\mathcal{T}, +, \cdot)$ in the \emph{orthogonal} basis of Chebyshev polynomials $\mathcal{T} := \{T_k\}_{k \in \N}$.
+  % TODO: find good notation for T, the set of T_k and the function space (set of functions) and function_space_N (in N coeffs)
   Note that the operation $\langle \cdot, \cdot \rangle$ satisfies all axioms of an authentic inner product (linearity, etc.) over a function space due to the linearity of the integral.
 
   In the following proceedings, we will restrict our view on functions over the interval $[-1, 1] \subset \R$.
@@ -168,33 +180,25 @@
     A different approach for the derivation of the explicit coefficient integrals can be found in \cite{atap} along with a complex analysis styled proof.
   \end{proof}
 
-  Dealing with a numerical problem, we shall later approximate the above two integrals by the rectangular integral rule.
+  Dealing with a numerical problem, we shall then approximate the above two integrals by the rectangular integral rule.
 
+  \subsection{Well, and numerically?}
   As computers rarely allow us to store infinitely many coefficients $a_k$, we will work with the truncated Chebyshev series
   $$f_N(x) = \sum_{k=0}^{N-1} a_k T_k(x), \quad k \in \{0, ..., N\},\quad N \in \N, N > 1$$
   which approximates the function $f$ with a degree $N-1$ polynomial up to an error
   $$f(x) - f_N(x) = \sum_{k=0}^{\infty} a_k T_k(x) - \sum_{k=0}^{N-1} a_k T_k(x) = \sum_{k=N}^{\infty} a_k T_k(x) \,.$$
 
+  \paragraph{Method One: Integral Approximation}
   \begin{theorem}{Rectangular integral rule}{integralapprox}
     $$\int_a^b f(x) \ddx = \lim_{N \rightarrow \infty} \frac{b-a}{N} \sum_{k=0}^N f(x_k), \quad x_k := a + \frac{b-a}{N} k$$
   \end{theorem}
   \cite[128]{bonthuis-cp}
-
-  \begin{minted}{cpp}
-    TschebFun TschebFun::interpolantThrough(Vector y) {
-      int order = y.size(), degree = order - 1;
-      Vector j = (xt::linspace((double)degree, 0.0, order) + 0.5) * (pi / order);
-      Vector coeffs = xt::zeros_like(y); // as many coefficients as data points
-      coeffs[0] = xt::sum(y)() / order;
-      for (size_t k = 1; k < order; k++)
-        coeffs[k] = (2.0 / order) * xt::sum(y * xt::cos(j * k))();
-      return TschebFun(coeffs);
-    }
-  \end{minted}
+  \todo{elaborate}
 
   Most importantly, this quadrature-style integral approximation is only one way of numerically determining the coefficients $a_k$.
   Another is to recognise the structure of the above integral for $k \neq 0$ as a cosine transform of the function $(f \circ \cos)$.
 
+  \paragraph{Method Two: Relation to the DCT}
   \begin{definition}{Cosine Transform}{costrans}
   \end{definition}
 
@@ -203,8 +207,11 @@
 
   Most significantly, this approach via the Discrete Cosine Transform can be sped up by means of the \emph{Fast Fourier Transform} \parencite{cooley-tukey-fft}.
 
+  \paragraph{Method Three: Barycentric Interpolation Formula}
   Numerically speaking, a significant improvement to these two approaches can be made by using the \emph{Barycentric interpolation formula in Chebyshev points} \parencite{atap}.
   Given more time, one should implement this feature in TschebFun as well.
+
+  \paragraph{Continuing with integral approximation ...}
 
   \begin{definition}{Chebyshev points}{chebpoints}
     From the equispaced points
@@ -219,19 +226,41 @@
     \caption{The Chebyshev points $\{x_j = \cos(\theta_j)\}$ are projections of the equispaced points $\{\theta_j\}$ on the unit circle onto the x-axis.}
   \end{figure}
 
-  \inputminted{cpp}{../solver/TschebFun.h}
-
+  \subsection{A small problem}
   Cannot use normal chebpoints in this interpolation method, because ...
+  \todo{elaborate}
   \begin{definition}{Modified Chebyshev points}{mod-chebpoints}
-    $$\Theta_N := \{\theta_j := \frac{(j + 0.5)\pi}{N} \;|\; j = 0, ..., N\} \,,$$
+    $$\Theta_N := \left\{\theta_j := \frac{(j + 0.5)\pi}{N} \;|\; j = 0, ..., N\right\} \,,$$
     $$X_N := \{x_j := \cos(\theta_j) \;|\; \theta_j \in \Theta_N\} \,.$$
   \end{definition}
 
-  \section{The heat equation and its solution}
-  Using the separation Ansatz, ...
+  \subsection{The algorithm}
+  Pseudo-Vandermonde bla
+  \begin{minted}{cpp}
+    TschebFun TschebFun::interpolantThrough(Vector y) {
+      int order = y.size(), degree = order - 1;
+      Vector j = (xt::linspace((double)degree, 0.0, order) + 0.5) * (pi / order);
+      Vector coeffs = xt::zeros_like(y); // as many coefficients as data points
+      coeffs[0] = xt::sum(y)() / order;
+      for (size_t k = 1; k < order; k++)
+        coeffs[k] = (2.0 / order) * xt::sum(y * xt::cos(j * k))();
+      return TschebFun(coeffs);
+    }
+  \end{minted}
 
-  \section{The spectral method}
+  % TODO: maybe a small plot of a function next to its interpolant?
 
+  \section{The Spectral Method}
+  \subsection{Forward Euler}
+  $$\frac{\partial u}{\partial t} \approx \frac{U_{n+1} - U_n}{\Delta t}$$
+  $$\U_{n+1} \approx U_n + \Delta t \frac{\partial u}{\partial t} = U_n + \alpha \Delta t \frac{\partial^2 u}{\partial x^2}$$
+
+  \begin{align*}
+    \vec{a}^{(t+\Delta t)} = \vec{a}^{(t)} - \alpha \Delta t \cdot D_N^2 \vec{a}^{(t)}
+  \end{align*}
+  \todo{elaborate}
+
+  \subsection{We need Differentiation}
   \begin{minted}{cpp}
     TschebFun TschebFun::derivative() {
       int n = coefficients.size();
@@ -250,10 +279,7 @@
   \end{minted}
 
   Differentiation matrix $D_N$ according to \cite{spectralmethods}.
-
-  \begin{align*}
-    \vec{a}^{(t+dt)} = \vec{a}^{(t)} - \alpha \Delta t \cdot D_N^2 \vec{a}^{(t)}
-  \end{align*}
+  \todo{elaborate}
 
   \subsection{Enforcing boundary conditions}
   One way of forcing the boundary conditions, at least the first that came to my mind when thinking of this issue, is to pin down the two highest-order coefficients in the series representation after the iteration.
@@ -278,13 +304,15 @@
 
   For $N$ odd: \autoref{eq:boundary-equation} has one unkown $a_{N-1} = \frac{l+r-\Sigma_1-\Sigma_2}{2},\; a_{N-2} = r - a_{N-1} - \Sigma_2$.
 
-  Adaptive time-steps.
+  \paragraph{Adaptive time-steps}
 
+  \subsection{The Destination}
   \begin{algorithm}[language=pseudo,caption={Heat Equation Forward-Euler}]
     currentU = currentU - $\alpha \Delta t$
   \end{algorithm}
 
-  \subsection{Clenshaw Algorithm}
+  \section{Evaluation, Analysis, Comparison and Results}
+  \subsection{Evaluation: The Clenshaw Algorithm}
   \begin{theorem}{Clenshaw recurrence relation}{clenshaw-recurrence}
   \end{theorem}
   \parencite[172-178]{art-of-sci-comp}.
@@ -303,8 +331,8 @@
     }
   \end{minted}
 
-  \subsection{Extension to a Python module}
-  Using \texttt{pybind11}.
+  \subsection{Analysis: Interface to Python}
+  Extension to a Python module, using \texttt{pybind11}.
 
   \begin{minted}{python}
     import heatfun, numpy as np
@@ -314,9 +342,12 @@
     solution = heatfun.solve(u0(cheb_x), 0.01, x_of_interest)
   \end{minted}
 
-  \section{Results}
+  \subsection{Comparison: ChebFun}
   \inputminted{matlab}{../analysis/heatfun.m}
 
+  % TODO: runtime benchmarks? Maybe only interpolation and evaluation
+
+  \subsection{Results: On Target?}
   % gaussian squared error: 8.622487716018498e-08
   % sines squared error: 1.0126407911934125e-05
   % radiation squared error: 0.00023109224612169596
@@ -331,15 +362,36 @@
 
   \begin{figure}[H]
     \centering
-    \inputtikz{comparison-radiation}
+    \inputtikz{comparison-sines}
     \caption{Comparison of heatfun and chebfun}
   \end{figure}
 
-  \section{Discussion}
+  \begin{figure}[H]
+    \centering
+    \inputtikz{comparison-tanh-kernel}
+    \caption{Comparison of heatfun and chebfun}
+  \end{figure}
+
+  \section{Outlook and Discussion}
+  Given more time, one should.
 
   \printbibliography
 
   \appendix
   \section{Title of Appendix}
   Appendices are definitely not necessary and assessors are not obliged to read them so only use them for non-vital text, figures or calculations.
+
+  \begin{figure}[H]
+    \centering
+    \inputtikz{comparison-radiation}
+    \caption{Comparison of heatfun and chebfun}
+  \end{figure}
+
+  \begin{figure}[H]
+    \centering
+    \inputtikz{comparison-double-tanh}
+    \caption{Comparison of heatfun and chebfun}
+  \end{figure}
+
+  \inputminted{cpp}{../solver/TschebFun.h}
 \end{document}

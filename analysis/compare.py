@@ -71,7 +71,7 @@ def analyse(example_key: str):
         RESULTS / f"comparison-{example_key}.tex",
         figure=fig,
         axis_width=r"0.8\linewidth",
-        axis_height=r"0.4\linewidth",
+        axis_height=r"0.3\linewidth",
     )
     fig.savefig(str(RESULTS / f"comparison-{example_key}.png"))
 
