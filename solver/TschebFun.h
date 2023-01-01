@@ -20,6 +20,9 @@ class TschebFun {
   TschebFun operator-(const TschebFun &other);
   TschebFun operator*(const double &factor);
   static TschebFun interpolantThrough(Vector y);
+
+  static Vector equipoints(size_t N);
   static Vector chebpoints(size_t N);
+  static Vector modifiedEquipoints(size_t N);
   static Vector modifiedChebpoints(size_t N);
 };

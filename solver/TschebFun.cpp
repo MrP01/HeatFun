@@ -17,14 +17,14 @@ TschebFun::TschebFun(Vector coeffs) : coefficients(coeffs) {
   print("Constructed TschebFun with", coefficients);
 }
 
-Vector TschebFun::chebpoints(size_t N) { return -xt::cos(xt::linspace(0.0, pi, N)); }
-Vector TschebFun::modifiedChebpoints(size_t N) {
-  return xt::sin(pi / N / 2.0 * xt::arange<double>(-(int)N + 1, N + 1, 2));
-}
+Vector TschebFun::equipoints(size_t N) { return xt::linspace(0.0, pi, N); }
+Vector TschebFun::chebpoints(size_t N) { return xt::cos(equipoints(N)); }
+Vector TschebFun::modifiedEquipoints(size_t N) { return (xt::arange<double>(0, N) + 0.5) * (pi / N); }
+Vector TschebFun::modifiedChebpoints(size_t N) { return xt::cos(modifiedEquipoints(N)); }
 
 TschebFun TschebFun::interpolantThrough(Vector y) {
   int order = y.size(), degree = order - 1;
-  Vector j = (xt::linspace((double)degree, 0.0, order) + 0.5) * (pi / order);
+  Vector j = modifiedEquipoints(order);
   Vector coeffs = xt::zeros_like(y); // as many coefficients as data points
   coeffs[0] = xt::sum(y)() / order;
   for (size_t k = 1; k < order; k++)
