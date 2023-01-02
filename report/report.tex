@@ -32,6 +32,7 @@
 \date{\today}
 
 \newcommand*{\todo}{\colorbox{green}}
+\setminted{fontsize=\footnotesize}
 
 % Outline:
 % ✅ Setting: define heat equation PDE problem (with BCs), explain series in x direction
@@ -41,12 +42,12 @@
 % ✅ - Using transformation to theta
 % ✅ - cite Cauchy integral for Laurent series
 % ✅ Define Lipschitz
-% Define Function Space in Cheb Basis
+% ✅ Define Function Space in Cheb Basis
 % ✅ Introduce Cheb series
-% Algorithm one: interpolantThrough()
-% - Method one: Rectangular integral approx. rule
-% - Method two: DCT
-% - Method three: Barycentric formula
+% ✅ Algorithm one: interpolantThrough()
+% ✅ - Method one: Rectangular integral approx. rule
+% ✅ - Method two: DCT
+% ✅ - Method three: Barycentric formula
 % Algorithm two: evaluateOn()
 % Numerics: Define Forward Euler
 % Algorithm three: differentiation of a Cheb series
@@ -78,8 +79,8 @@
     Numerically obtain the solution $u(x, T)$ of
     \vspace*{-0.2cm}
     $$\begin{cases}
-        \frac{\partial u}{\partial t} = \alpha \frac{\partial^2 u}{\partial x^2} \quad & u: [-1, 1] \times [0, T] \mapsto \R,\, T \in \R^+,\; \alpha \in \R^+ \\
-        u(x_j, 0) = u_0(x_j) \quad                                                     & \forall x_j \in X_N,\; N \in \N,\, N > 1, \; u_0: [-1, 1] \mapsto \R \\
+        \frac{\partial u}{\partial t} = \alpha \frac{\partial^2 u}{\partial x^2} \quad & u: [-1, 1] \times [0, T] \mapsto \R,\, T \in \R^+,\; \alpha \in \R^+         \\
+        u(x_j, 0) = u_0(x_j) \quad                                                     & \forall x_j \in \tilde{X}_N,\; N \in \N,\, N > 1, \; u_0: [-1, 1] \mapsto \R \\
         u(b, t) = u_0(b)                                                               & \forall b \in \{-1, 1\},\; \forall t \in (0, T] \,.
       \end{cases}$$
     \vspace*{0.05cm}
@@ -294,11 +295,11 @@
   More details can be found in \cite{CombTrig}.
 
   \begin{equation}
-    a_k = \frac{2}{N} \sum_{j=0}^{N-1} f(x_j) \cos(k \theta_j), \quad \theta_j \in \tilde{\Theta}_N \,.
+    a_k = \frac{2}{N} \sum_{j=0}^{N-1} f(x_j) \cos(k \theta_j), \quad \theta_j \in \tilde{\Theta}_N, \quad k > 0 \,.
     \label{eq:coefficient-formula}
   \end{equation}
 
-  \subsection{The Algorithm}
+  \subsection{The Interpolation Algorithm}
   Implementing the rectangular integral rule, TschebFun begins by computing $a_0$ as the sum of all $y$, normalised by $\frac{1}{N}$.
   We compute the remaining coefficients in a for-loop, directly according to \autoref{eq:coefficient-formula}.
   The input, $\vec{y} \in \R^N$ is a vector of function values sampled at the modified Chebyshev points $\tilde{X}_N$.
@@ -306,7 +307,7 @@
     TschebFun TschebFun::interpolantThrough(Vector y) {
       int order = y.size(), degree = order - 1;
       Vector j = modifiedEquipoints(order);
-      Vector coeffs = xt::zeros_like(y); // as many coefficients as points
+      Vector coeffs = xt::zeros_like(y); // as many coefficients as data points
       coeffs[0] = xt::sum(y)() / order;
       for (size_t k = 1; k < order; k++)
         coeffs[k] = (2.0 / order) * xt::sum(y * xt::cos(j * k))();
@@ -325,26 +326,40 @@
       f(x_0) \\
       f(x_1) \\
       \vdots \\
-      f(x_N) \\
+      f(x_N)
     \end{pmatrix}, \quad x_j \in \tilde{X}_N \,.$$
 
   % TODO: maybe a small plot of a function next to its interpolant?
 
   \section{The Spectral Method}
+  Now that we have the most important tool in our belt, Chebyshev interpolation, we can proceed to solve our original problem as given on page 1.
+
   \subsection{Forward Euler}
-  $$\frac{\partial u}{\partial t} \approx \frac{U_{n+1} - U_n}{\Delta t}$$
-  $$\U_{n+1} \approx U_n + \Delta t \frac{\partial u}{\partial t} = U_n + \alpha \Delta t \frac{\partial^2 u}{\partial x^2}$$
+  As mentioned earlier, we will approximate the time-derivative using the Forward Euler numerical scheme.
+  The numerical solution $u$ of our differential equation then fulfills
+  $$\frac{\partial u^{(t)}}{\partial t} \approx \frac{u^{(t+\Delta t)} - u^{(t)}}{\Delta t} \quad\Leftrightarrow\quad u^{(t+\Delta t)} \approx u^{(t)} + \Delta t \frac{\partial u^{(t)}}{\partial t} = u^{(t)} + \alpha \Delta t \frac{\partial^2 u^{(t)}}{\partial x^2} \,,$$
+  which provides us with an explicit relation for the next time-level $U^{(t+\Delta t)}$ given the previous one.
+  The numerical accuracy of this scheme is only $\mathcal{O}(\Delta t)$.
+  Approaches to improve this would be by using, for instance, linear multistep methods.
 
+  So in our case, assuming the existence of a differentiation operator $\mathcal{D}_N: \mathbb{T}_N \mapsto \mathbb{T}_N$, the solution function $u^{(t)} \in \mathbb{T}_N$ at time $t$ evolves as follows:
   \begin{align*}
-    \vec{a}^{(t+\Delta t)} = \vec{a}^{(t)} - \alpha \Delta t \cdot D_N^2 \vec{a}^{(t)}
+    u^{(t+\Delta t)} = u^{(t)} + \alpha \Delta t \cdot \mathcal{D}_N^2 u^{(t)} \,.
   \end{align*}
-  \todo{elaborate}
 
-  \subsection{We need Differentiation}
+  \subsection{Differentiation in the Spatial Direction}
+  So now, our aim is to find an explicit relation between the coefficients of the derivative of a function $u^{(t)} \in \mathbb{T}_N$ and the original coefficients.
+  As differentiation is a linear operation, which can be especially well understood from this very fact, there exists a matrix $D_N \in \R^{N-1 \times N}$ corresponding to the differentiation operation $\mathcal{D}_N$.
+  $$\text{For any } u \in \mathbb{T}_N,\, u(x) = \sum_{k=0}^{N-1} a_k T_k(x), \quad u' = \mathcal{D}_N u \;\Leftrightarrow\; \vec{a}' = D_N \vec{a} \,.$$
+
+  The explicit form of this differentiation matrix can be found in chapter 6 of \cite{spectralmethods}.
+  Our approach shall be a bit different, the algorithmic implementation can be made more space- and time-efficient by performing an iteration over the coefficients directly.
+
+  In TschebFun, it is implemented as follows, as adapted from \cite{numpy}:
   \begin{minted}{cpp}
     TschebFun TschebFun::derivative() {
       int n = coefficients.size();
-      n = n - 1; // differentiation reduces the degree (order) by 1
+      n = n - 1; // differentiation reduces the order by 1
       Vector coeffs = coefficients; // make a copy
       Vector derivative = xt::zeros<double>({n});
       for (size_t j = n; j > 2; j--) {
@@ -358,11 +373,10 @@
     }
   \end{minted}
 
-  Differentiation matrix $D_N$ according to \cite{spectralmethods}.
-  \todo{elaborate}
+  The next step is to make sure that the newly obtained $u^{(t+\Delta t)}$ fulfills the boundary conditions $u^{(t)}(-1) = l \;\wedge\; u^{(t)}(1) = r$ as well!
 
-  \subsection{Enforcing boundary conditions}
-  One way of forcing the boundary conditions, at least the first that came to my mind when thinking of this issue, is to pin down the two highest-order coefficients in the series representation after the iteration.
+  \subsection{Enforcing Boundary Conditions}
+  One way of forcing the boundary conditions, at least the first that came to mind when thinking of this issue, is to pin down the two highest-order coefficients in the series representation after the iteration.
 
   Let $l := u_0(-1)$, $r := u_0(1)$.
   Recognise that
@@ -386,12 +400,49 @@
 
   \paragraph{Adaptive time-steps}
 
-  \subsection{The Destination}
-  \begin{algorithm}[language=pseudo,caption={Heat Equation Forward-Euler}]
-    currentU = currentU - $\alpha \Delta t$
+  \subsection{The Spectral Heat Equation Solver}
+  \begin{algorithm}[language=pseudo,caption={\centering Our final solving algorithm}]
+input: $\vec{u_0} \in \R^N$, s.t. $\{\vec{u_0}\}_j = u_0(x_j) \; \forall x_j \in \tilde{X}_N$, final time $T \in \R^+$.
+output: $u^{(T)} \in \mathbb{T}_N$.
+
+let $u^{(0)}$ = |\color{themecolor3}TschebFun|::|\color{themecolor2}interpolantThrough|($\vec{u_0}$).
+for ($t = 0$; $t \le T$; $t$ += $\Delta t$); do
+  |\rm\color{gray}Behaviour according to the differential equation:|
+  set $u^{(t+\Delta t)}$ = $u^{(t)}$ + $\alpha \Delta t$ $\cdot$ $\mathcal{D}_N^2 u^{(t)}$ |\rm\color{gray}using| |\color{themecolor3}TschebFun|::|\color{themecolor2}derivative|() |\rm\color{gray}twice|.
+
+  |\rm\color{gray}Enforce boundary conditions on $u^{(t+\Delta t)}$:|
+  let $\Sigma_1 = \sum_{k=0}^{N-3} a_k^{(t+\Delta t)} (-1)^k$.
+  let $\Sigma_2 = \sum_{k=0}^{N-3} a_k^{(t+\Delta t)}$.
+  if $N$ even; do
+    set $a_{N-2}^{(t+\Delta t)} = \frac{l+r-\Sigma_1-\Sigma_2}{2}$.
+    set $a_{N-1}^{(t+\Delta t)} = r - a_{N-2}^{(t+\Delta t)} - \Sigma_2$.
+  else if $N$ odd; do
+    set $a_{N-1}^{(t+\Delta t)} = \frac{l+r-\Sigma_1-\Sigma_2}{2}$.
+    set $a_{N-2}^{(t+\Delta t)} = r - a_{N-1}^{(t+\Delta t)} - \Sigma_2$.
+  end
+
+  return $u^{(T)}$, |\rm\color{gray} which can be evaluated using| |\color{themecolor3}TschebFun|::|\color{themecolor2}evaluateOn|().
+end
   \end{algorithm}
 
-  \section{Evaluation, Analysis, Comparison and Results}
+  Including adaptive time-steps, part of the above algorithm is implemented in C++ as
+  \begin{minted}{cpp}
+    void HeatSolver::iterate() {
+      // base step, leaves two degrees of freedom a_{N}, a_{N-1}
+      TschebFun previousU = currentU;
+      currentU = previousU + previousU.derivative().derivative() * (dt * alpha);
+      forceBoundaryConditions();
+      totalTime += dt;
+
+      if (optimisations.adaptiveDt) {
+        double change = xt::sum(xt::abs(currentU.coefficients - previousU.coefficients))();
+        dt *= pow(optimisations.adaptiveGoalDu / change, 0.2);
+        std::cout << "dt: " << dt << std::endl;
+      }
+    }
+  \end{minted}
+
+  \section{Analysis, Comparison and Results}
   \subsection{Evaluation: The Clenshaw Algorithm}
   \begin{theorem}{Clenshaw recurrence relation}{clenshaw-recurrence}
   \end{theorem}
@@ -424,6 +475,7 @@
 
   \subsection{Comparison: ChebFun}
   \inputminted{matlab}{../analysis/heatfun.m}
+  \parencite{exploring}
 
   % TODO: runtime benchmarks? Maybe only interpolation and evaluation
 
@@ -454,6 +506,8 @@
 
   \section{Outlook and Discussion}
   Given more time, one should.
+
+  If even $u_0 \in \mathbb{T}_N$, then the approximation is exact and the error is inherited from Forward-Euler.
 
   \printbibliography
 
