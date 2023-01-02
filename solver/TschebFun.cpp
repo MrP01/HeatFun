@@ -19,7 +19,7 @@ TschebFun::TschebFun(Vector coeffs) : coefficients(coeffs) {
 
 Vector TschebFun::equipoints(size_t N) { return xt::linspace(0.0, pi, N); }
 Vector TschebFun::chebpoints(size_t N) { return xt::cos(equipoints(N)); }
-Vector TschebFun::modifiedEquipoints(size_t N) { return xt::linspace(0.0, pi, N); }
+Vector TschebFun::modifiedEquipoints(size_t N) { return (xt::arange<double>(0, N) + 0.5) * (pi / N); }
 Vector TschebFun::modifiedChebpoints(size_t N) { return xt::cos(modifiedEquipoints(N)); }
 
 TschebFun TschebFun::interpolantThrough(Vector y) {
@@ -69,8 +69,8 @@ TschebFun TschebFun::operator+(const TschebFun &other) {
 TschebFun TschebFun::operator-(const TschebFun &other) {
   size_t mine = coefficients.size(), theirs = other.coefficients.size();
   Vector new_coeffs = xt::zeros<double>({max(mine, theirs)});
-  xt::view(new_coeffs, xt::range(0, coefficients.size())) += coefficients;
-  xt::view(new_coeffs, xt::range(0, other.coefficients.size())) += other.coefficients;
+  xt::view(new_coeffs, xt::range(0, coefficients.size())) -= coefficients;
+  xt::view(new_coeffs, xt::range(0, other.coefficients.size())) -= other.coefficients;
   return TschebFun(new_coeffs);
 }
 TschebFun TschebFun::operator*(const double &factor) { return TschebFun(coefficients * factor); }

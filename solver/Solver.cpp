@@ -15,7 +15,7 @@ void HeatSolver::setup(Vector u0) {
 void HeatSolver::iterate() {
   // base step, leaves two degrees of freedom a_{N}, a_{N-1}
   TschebFun previousU = currentU;
-  currentU = previousU - previousU.derivative().derivative() * (dt * alpha);
+  currentU = previousU + previousU.derivative().derivative() * (dt * alpha);
   forceBoundaryConditions();
   totalTime += dt;
 
