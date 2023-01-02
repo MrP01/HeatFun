@@ -197,7 +197,7 @@
 
   Dealing with a numerical problem, we shall then approximate the above two integrals by the rectangular integral rule.
 
-  \subsection{A Numerical Tale}
+  \subsection{Numerical Computation of Coefficients}
   As computers rarely allow us to store infinitely many coefficients $a_k$, we will work with the truncated Chebyshev series
   \begin{equation}
     f_N(x) = \sum_{k=0}^{N-1} a_k T_k(x), \quad k \in \{0, ..., N-1\},\quad N \in \N, N > 1
@@ -218,7 +218,7 @@
           The integrals can be approximated numerically using one of many available \textit{approximation rules}.
           \begin{theorem}{Rectangular integral rule}{integralapprox}
             For a function $f: [a, b] \mapsto \R$, its integral can be approximated by
-            $$\int_a^b f(x) \ddx = \lim_{N \rightarrow \infty} \frac{b-a}{N} \sum_{k=0}^{N-1} f(x_k), \quad x_k := a + \frac{b-a}{N} k \,.$$
+            $$\int_a^b f(x) \ddx = \lim_{N \rightarrow \infty} \frac{b-a}{N} \sum_{j=0}^{N-1} f(x_j), \quad x_j := a + \frac{b-a}{N} j \,.$$
           \end{theorem}
           We will look at an actual implementation of this in the next subsection.
 
@@ -285,27 +285,48 @@
   One way to fix this issue is to use \emph{modified chebpoints} (\autoref{def:mod-chebpoints}) as in the DCT-II, leveraging half-way points \parencite{CombTrig}.
 
   \begin{definition}{Modified Chebyshev points}{mod-chebpoints}
-    $$\Theta_N := \left\{\theta_j := \frac{(j + \frac{1}{2})\pi}{N-1} \;\bigg|\; j = 0, ..., N-1\right\} \,,$$
-    $$X_N := \{x_j := \cos(\theta_j) \;|\; \theta_j \in \Theta_N\} \,.$$
+    $$\tilde{\Theta}_N := \left\{\theta_j := \frac{(j + \frac{1}{2})\pi}{N-1} \;\bigg|\; j = 0, ..., N-1\right\} \,,$$
+    $$\tilde{X}_N := \{x_j := \cos(\theta_j) \;|\; \theta_j \in \Theta_N\} \,.$$
   \end{definition}
 
   Our implementation, \texttt{\textcolor{themecolor3}{TschebFun}::\textcolor{themecolor2}{interpolantThrough}()}, uses these modified chebpoints to circumvent the above issues.
   In short, the half-way point integral approximation is more accurate in this case and, for small $N$, gives the exact coefficients as expected.
   More details can be found in \cite{CombTrig}.
 
+  \begin{equation}
+    a_k = \frac{2}{N} \sum_{j=0}^{N-1} f(x_j) \cos(k \theta_j), \quad \theta_j \in \tilde{\Theta}_N \,.
+    \label{eq:coefficient-formula}
+  \end{equation}
+
   \subsection{The Algorithm}
-  Pseudo-Vandermonde bla
+  Implementing the rectangular integral rule, TschebFun begins by computing $a_0$ as the sum of all $y$, normalised by $\frac{1}{N}$.
+  We compute the remaining coefficients in a for-loop, directly according to \autoref{eq:coefficient-formula}.
+  The input, $\vec{y} \in \R^N$ is a vector of function values sampled at the modified Chebyshev points $\tilde{X}_N$.
   \begin{minted}{cpp}
     TschebFun TschebFun::interpolantThrough(Vector y) {
       int order = y.size(), degree = order - 1;
-      Vector j = (xt::linspace((double)degree, 0.0, order) + 0.5) * (pi / order);
-      Vector coeffs = xt::zeros_like(y); // as many coefficients as data points
+      Vector j = modifiedEquipoints(order);
+      Vector coeffs = xt::zeros_like(y); // as many coefficients as points
       coeffs[0] = xt::sum(y)() / order;
       for (size_t k = 1; k < order; k++)
         coeffs[k] = (2.0 / order) * xt::sum(y * xt::cos(j * k))();
       return TschebFun(coeffs);
     }
   \end{minted}
+
+  Note that the above algorithm can also be expressed as the dot-product of a matrix, a Pseudo-Vandermonde matrix $V \in \R^{N\times N}$ in the Chebyshev basis, with the vector $\vec{y}$.
+
+  $$\vec{a} = V \vec{y} = \frac{1}{N} \begin{pmatrix}
+      T_0(x_0)  & T_0(x_1)  & \cdots & T_0(x_N)  \\
+      2T_1(x_0) & 2T_1(x_1) & \cdots & 2T_1(x_N) \\
+      \vdots    & \vdots    & \ddots & \vdots    \\
+      2T_N(x_0) & 2T_N(x_1) & \cdots & 2T_N(x_N) \\
+    \end{pmatrix} \begin{pmatrix}
+      f(x_0) \\
+      f(x_1) \\
+      \vdots \\
+      f(x_N) \\
+    \end{pmatrix}, \quad x_j \in \tilde{X}_N \,.$$
 
   % TODO: maybe a small plot of a function next to its interpolant?
 
