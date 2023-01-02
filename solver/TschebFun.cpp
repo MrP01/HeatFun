@@ -19,7 +19,7 @@ TschebFun::TschebFun(Vector coeffs) : coefficients(coeffs) {
 
 Vector TschebFun::equipoints(size_t N) { return xt::linspace(0.0, pi, N); }
 Vector TschebFun::chebpoints(size_t N) { return xt::cos(equipoints(N)); }
-Vector TschebFun::modifiedEquipoints(size_t N) { return (xt::arange<double>(0, N) + 0.5) * (pi / N); }
+Vector TschebFun::modifiedEquipoints(size_t N) { return xt::linspace(0.0, pi, N); }
 Vector TschebFun::modifiedChebpoints(size_t N) { return xt::cos(modifiedEquipoints(N)); }
 
 TschebFun TschebFun::interpolantThrough(Vector y) {
@@ -29,7 +29,6 @@ TschebFun TschebFun::interpolantThrough(Vector y) {
   coeffs[0] = xt::sum(y)() / order;
   for (size_t k = 1; k < order; k++)
     coeffs[k] = (2.0 / order) * xt::sum(y * xt::cos(j * k))();
-  assert(coeffs.size() == order);
   return TschebFun(coeffs);
 }
 

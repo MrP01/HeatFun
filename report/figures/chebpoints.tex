@@ -9,7 +9,7 @@
     \addplot [domain=-1:1, samples=180] {sqrt(1-x^2)};
     \pgfplotsinvokeforeach {0,  10,  20,  30,  40,  50,  60,  70,  80,  90, 100} {
       \addplot[samples=2, domain=0:1, variable=\t, blue!#1!green] ({cos(#1*180/100)}, {t*sin(#1*180/100)});
-      \filldraw[themecolor2] ({cos(#1*180/100)}, {sin(#1*180/100)}) circle (3pt);
+      \filldraw[gray] ({cos(#1*180/100)}, {sin(#1*180/100)}) circle (3pt);
       \filldraw[themecolor] ({cos(#1*180/100)}, {0}) circle (3pt);
     };
   \end{axis}
