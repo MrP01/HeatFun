@@ -14,7 +14,6 @@
 \usepackage{prettytex/gfx}
 \usepackage{prettytex/code}
 \usepackage{prettytex/pseudo}
-\usepackage{prettytex/todo}
 \usepackage{prettytex/thesis}
 \usepackage{cleveref}
 \usepackage{lipsum}
@@ -31,6 +30,8 @@
 \title{\topictitle}
 \author{Candidate \candidatenumber}
 \date{\today}
+
+\newcommand*{\todo}{\colorbox{green}}
 
 % Outline:
 % ✅ Setting: define heat equation PDE problem (with BCs), explain series in x direction
@@ -104,8 +105,18 @@
   For non-periodic problem settings, \textsc{Chebyshev} series are a fantastic choice.
 
   \subsection{The heat equation and its solution}
-  Using the separation Ansatz
-  $$u(x, t) = X(x) T(t), \quad X: [-1, 1] \mapsto \R, \quad T: [0, T] \mapsto \R$$
+  Classical approaches to solving the heat equation are
+
+  \begin{itemize}
+    \item Using the separation Ansatz
+          $$u(x, t) = \underline{X}(x) \underline{T}(t), \quad X: [-1, 1] \mapsto \R, \quad \underline{T}: [0, T] \mapsto \R$$
+
+    \item By Fourier-analysis (similar to below, or maybe even simpler: differentiation simply multiplies the Fourier coefficients by $ik$).
+
+    \item Numerically, a finite difference scheme such as
+          $$\frac{U_{j}^{(n+1)} - U_{j}^{(n)}}{\Delta t} = \alpha \frac{U_{j+1}^{(n)} - 2 U_{j}^{(n)} + U_{j-1}^{(n)}}{(\Delta x)^2}$$
+  \end{itemize}
+
   \todo{elaborate}
 
   \section{Chebyshev Interpolation}
@@ -120,7 +131,7 @@
     for degree $k \in \N$. Then, $T_0(x) = 1$, $T_1(x) = x$, $T_2(x) = 2x^2-1$, and so on.
   \end{definition}
 
-  These relations between $x$, $z$ and $\theta$ reveal fundamental connections between three famous basis sets (as we will confirm later): \textsc{Chebyshev}, \textsc{Laurent} and \textsc{Fourier}.
+  These relations between $x$, $z$ and $\theta$ reveal fundamental connections between three famous basis sets: \textsc{Chebyshev}, \textsc{Laurent} and \textsc{Fourier}.
   \todo{elaborate}
 
   \begin{theorem}{Chebyshev Recursion Formula}{chebrecursion}
@@ -189,8 +200,10 @@
   $$f(x) - f_N(x) = \sum_{k=0}^{\infty} a_k T_k(x) - \sum_{k=0}^{N-1} a_k T_k(x) = \sum_{k=N}^{\infty} a_k T_k(x) \,.$$
 
   \paragraph{Method One: Integral Approximation}
+  Text
+
   \begin{theorem}{Rectangular integral rule}{integralapprox}
-    $$\int_a^b f(x) \ddx = \lim_{N \rightarrow \infty} \frac{b-a}{N} \sum_{k=0}^N f(x_k), \quad x_k := a + \frac{b-a}{N} k$$
+    $$\int_a^b f(x) \ddx = \lim_{N \rightarrow \infty} \frac{b-a}{N} \sum_{k=0}^{N-1} f(x_k), \quad x_k := a + \frac{b-a}{N} k$$
   \end{theorem}
   \cite[128]{bonthuis-cp}
   \todo{elaborate}
@@ -199,23 +212,31 @@
   Another is to recognise the structure of the above integral for $k \neq 0$ as a cosine transform of the function $(f \circ \cos)$.
 
   \paragraph{Method Two: Relation to the DCT}
+  Text
+
   \begin{definition}{Cosine Transform}{costrans}
+    $$\hat{f}(\omega) := \int_{0}^{\pi} f(t) \cos(\omega t) \ddt$$
   \end{definition}
 
-  \begin{definition}{Discrete Cosine Transform}{dct}
+  \begin{definition}{DCT-II: Discrete Cosine Transform - type II}{dct}
+    $$\hat{y}_k := \sum _{n=0}^{N-1}y_{n}\cos \left[\,{\tfrac {\,\pi \,}{N}}\left(n+{\frac {1}{2}}\right)k\,\right]\qquad {\text{ for }}~k=0,\ \dots \ N-1~.$$
   \end{definition}
 
   Most significantly, this approach via the Discrete Cosine Transform can be sped up by means of the \emph{Fast Fourier Transform} \parencite{cooley-tukey-fft}.
+
+  The above two methods demonstrate why it is sensible to choose to sample a function in \textit{chebpoints} instead of equispaced points, simply because the mathematics works out nicely in this basis.
+  A much more fundamental numerical insight relating to the choice of points is the \emph{Runge phenomenon} \parencite{runge-phenomenon}.
 
   \paragraph{Method Three: Barycentric Interpolation Formula}
   Numerically speaking, a significant improvement to these two approaches can be made by using the \emph{Barycentric interpolation formula in Chebyshev points} \parencite{atap}.
   Given more time, one should implement this feature in TschebFun as well.
 
   \paragraph{Continuing with integral approximation ...}
+  Text
 
   \begin{definition}{Chebyshev points}{chebpoints}
     From the equispaced points
-    $$\Theta_N := \{\theta_j := j\pi/N \;|\; j = 0, ..., N\} \,,$$
+    $$\Theta_N := \left\{\theta_j := \frac{j\pi}{N-1} \;\bigg|\; j = 0, ..., N-1\right\} \,,$$
     we can further define the Chebyshev points as the corresponding $\cos(\theta_j)$,
     $$X_N := \{x_j := \cos(\theta_j) \;|\; \theta_j \in \Theta_N\} \,.$$
   \end{definition}
@@ -226,15 +247,35 @@
     \caption{The Chebyshev points $\{x_j = \cos(\theta_j)\}$ are projections of the equispaced points $\{\theta_j\}$ on the unit circle onto the x-axis.}
   \end{figure}
 
-  \subsection{A small problem}
-  Cannot use normal chebpoints in this interpolation method, because ...
+  \subsection{A Numerical Issue}
+  Wanting to interpolate through $N$ points, namely through $\{(x_j, f(x_j)) \;|\; x_j \in X_N\}$, the corresponding truncated Chebyshev series will have $N$ coefficients. To approximate the coefficient integral, we use \autoref{thm:integralapprox} without the limit.
+
+  Even approximately speaking, the rectangular integral rule in application to \autoref{thm:cheb-coefficient-integrals} does, in some situations, not approach the correct coefficients.
+  We now consider three different variations of the rectangular rule integral approximation, see why none of them are optimal in this situation and look at a possible resolution to this numerical issue, inspired by the DCT (\autoref{def:dct}).
+
+  Intuitively, the problem is related to the endpoints of the interval $[0, \pi]$, the corresponding areas under the curve we aim to integrate and symmetry.
+  In the following, consider the (near-) simplest case $N = 2$ and $f(x) = x$.
+  The analytical solution is $a_0 = 0$ and $a_1 = 1$.
+
+  \begin{itemize}
+    \item With $\Theta_N$ as in \autoref{def:chebpoints}, consider the issue that
+          $$a_1 = \frac{2}{\pi} \int_{0}^{\pi} \cos^2(\theta) \dd\theta \approx \frac{2}{N} \sum_{j=0}^{N-1} \cos^2\left(\frac{j \pi}{N-1}\right) = \frac{2}{2} \left(\cos^2(0) + \cos^2(\pi)\right) = 2 \neq 1 \,.$$
+    \item Instead sampling at $\{\cos\left(\frac{j\pi}{N}\right) \;\big|\; j = 0, ..., N-1\}$,
+          $$a_0 = \frac{1}{\pi} \int_0^\pi \cos(\theta) \dd\theta \approx \frac{1}{N} \sum_{j=0}^{N-1} \cos(\frac{j\pi}{N}) = \frac{1}{2} \left(\cos(0) + \cos(\pi/2)\right) = \frac{1}{2} \neq 0 \,.$$
+    \item Even for a creative $\{\cos\left(\frac{j\pi}{N+1}\right) \;\big|\; j = 1, ..., N\}$,
+          $$a_1 \approx \frac{2}{N} \sum_{j=1}^{N} \cos^2\left(\frac{j \pi}{N+1}\right) = \frac{2}{2} \left(\cos^2(\pi/3) + \cos^2(2\pi/3)\right) = \frac{1}{2} \neq 1 \,.$$
+  \end{itemize}
+
+  So we cannot use normal chebpoints in this interpolation method.
+
   \todo{elaborate}
   \begin{definition}{Modified Chebyshev points}{mod-chebpoints}
-    $$\Theta_N := \left\{\theta_j := \frac{(j + 0.5)\pi}{N} \;|\; j = 0, ..., N\right\} \,,$$
+    $$\Theta_N := \left\{\theta_j := \frac{(j + \frac{1}{2})\pi}{N-1} \;\bigg|\; j = 0, ..., N-1\right\} \,,$$
     $$X_N := \{x_j := \cos(\theta_j) \;|\; \theta_j \in \Theta_N\} \,.$$
   \end{definition}
+  \cite{CombTrig}.
 
-  \subsection{The algorithm}
+  \subsection{The Algorithm}
   Pseudo-Vandermonde bla
   \begin{minted}{cpp}
     TschebFun TschebFun::interpolantThrough(Vector y) {

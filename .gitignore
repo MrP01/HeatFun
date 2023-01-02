@@ -18,6 +18,7 @@
 *.nlo
 *.nls
 *.out
+*.pyg
 *.run.xml
 *.synctex*busy*
 *.synctex.gz
