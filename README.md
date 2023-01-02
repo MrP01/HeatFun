@@ -1,14 +1,29 @@
 # HeatFun - a spectral solver
 
-Exploring the heat equation as part of a Special Topic for Approximation of Functions.
+Exploring the :fire: heat equation :fire: as part of a Special Topic for Approximation of Functions.
 
-**Solving PDEs using Spectral Methods in the Chebyshev basis by example of the Heat Equation.**
+:rocket: **Solving PDEs using Spectral Methods in the Chebyshev basis by example of the Heat Equation.** :rocket:
 A Special Topic on Approximation of Functions.
 
 ![Screenshot of the spectral heat equation solver](report/figures/screenshot.png)
 _Screenshot of the graphical user interface. After entering an initial expression
 u0(x), depicted in grey, the simulation will run upon pressing ’Start’. The solution at
 time t, depicted in blue, is represented as a Chebyshev series of degree 29._
+
+## Usage:
+
+HeatFun depends on Qt6, uses conan as a package manager and does analysis in Python and MatLab.
+The project uses an out-of-source build:
+
+```bash
+mkdir -p build/
+cd build
+conan install ..
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make -j 4
+```
+
+## A short introduction
 
 Partial differential equations are notoriously hard to solve. One more possible approach
 to make way in this important class of problems is by the technique of spectral methods,
@@ -25,3 +40,5 @@ TschebFun::evaluateOn() and TschebFun::derivative(), is done manually
 in C++, extended to work as a Python module and for demonstration, even
 features a high-level graphical interface to play with. Finally, we will compare
 the numerical results with the output of Chebfun’s high-level pde15s().
+
+Download the report [here](https://raw.githubusercontent.com/MrP01/HeatFun/master/report/report.pdf).
