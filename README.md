@@ -2,7 +2,7 @@
 
 Exploring the :fire: heat equation :fire: as part of a Special Topic for Approximation of Functions.
 
-:rocket: **Solving PDEs using Spectral Methods in the Chebyshev basis by example of the Heat Equation.** :rocket:
+:rocket: **Solving PDEs using Spectral Methods in the Chebyshev basis by example of the Heat Equation.** :rocket:  
 A Special Topic on Approximation of Functions.
 
 ![Screenshot of the spectral heat equation solver](report/figures/screenshot.png)
@@ -10,7 +10,7 @@ _Screenshot of the graphical user interface. After entering an initial expressio
 u0(x), depicted in grey, the simulation will run upon pressing ’Start’. The solution at
 time t, depicted in blue, is represented as a Chebyshev series of degree 29._
 
-## Usage:
+## Usage
 
 HeatFun depends on Qt6, uses conan as a package manager and does analysis in Python and MatLab.
 The project uses an out-of-source build:
@@ -23,7 +23,23 @@ cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j 4
 ```
 
-## A short introduction
+**To run the graphical user interface**:
+```bash
+./bin/main
+```
+**For usage as a Python module**:
+```python3
+import pathlib
+import sys
+
+BASE = pathlib.Path(__file__).parent.parent
+sys.path.append(str(BASE / "build" / "lib"))
+import heatfun
+
+heatfun.solve(...)
+```
+
+## Motivation and Background
 
 Partial differential equations are notoriously hard to solve. One more possible approach
 to make way in this important class of problems is by the technique of spectral methods,
