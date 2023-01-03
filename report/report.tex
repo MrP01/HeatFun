@@ -32,6 +32,7 @@
 \date{\today}
 
 \setminted{fontsize=\footnotesize}
+\AfterEndEnvironment{minted}{\vspace*{-0.8cm}}
 
 % Outline:
 % ✅ Setting: define heat equation PDE problem (with BCs), explain series in x direction
@@ -381,10 +382,10 @@
     }
   \end{minted}
 
-  The next step is to make sure that the newly obtained $u^{(t+\Delta t)}$ fulfills the boundary conditions $u^{(t)}(-1) = l \;\wedge\; u^{(t)}(1) = r$ as well!
+  The next step is to make sure that the newly obtained $u^{(t+\Delta t)}$ fulfills the boundary conditions $u^{(t)}(-1) = l$ and $u^{(t)}(1) = r$ as well!
 
   \subsection{Enforcing Boundary Conditions}
-  One way of forcing the boundary conditions, at least the first that came to mind when thinking of this issue, is to pin down the two highest-order coefficients in the series representation after the iteration.
+  One way of forcing the boundary conditions, at least the first that came to mind when thinking of this issue, is to pin down the two highest-order coefficients, who are untouched by the differential equation (differentiating a polynomial twice reduces its degree by two), in the series representation after the iteration.
 
   Let $l := u_0(-1)$, $r := u_0(1)$.
   Recognise that
@@ -436,7 +437,7 @@ for ($t = 0$; $t \le T$; $t$ += $\Delta t$); do
 end
   \end{algorithm}
 
-  Perhaps simpler, more compact and including adaptive time-steps, part of the above algorithm is implemented in C++ as
+  Perhaps simpler, more compact and including adaptive time-steps, the core part of the above algorithm is implemented in C++ as
   \begin{minted}{cpp}
     void HeatSolver::iterate() {
       // base step, leaves two degrees of freedom a_{N}, a_{N-1}
@@ -454,7 +455,7 @@ end
 
   \section{Analysis, Comparison and Results}
   The implementation is complete and we are ready to look at our results.
-  One more thing is missing though, given the coefficients $\vec{a}^{(T)}$ we also want to evaluate the Chebyshev series $u^{(T)} \in \mathbb{T}_N$ on some $\vec{x} \subset [-1, 1]$!
+  One more thing is missing though, given the coefficients $\vec{a}^{(T)}$ we also want to evaluate the Chebyshev series $u^{(T)} \in \mathbb{T}_N$ on some $x \subset [-1, 1]$!
 
   \subsection{Evaluation: The Clenshaw Algorithm}
   For this purpose, let us recall the recurrence relation we proved in the very beginning, \autoref{thm:chebrecursion}.
@@ -482,7 +483,8 @@ end
     }
   \end{minted}
 
-  This implementation can even work with vector-valued $\vec{x}$.
+  Essentially, the idea is simple: Using the recurrence relation (\autoref{thm:chebrecursion}) to our advantage and tracking the sum of $a_k T_k(x)$ on the way from $k = N-2$ to $k=0$, which is why we call it the backward Clenshaw recurrence.
+  The above implementation can work with vector-valued $\vec{x}$.
 
   \subsection{Analysis: Interface to Python}
   Another exciting aspect of HeatFun is its extension to a compiled Python module using \texttt{pybind11}\footnote{\url{https://pybind11.readthedocs.io/}}, which allows any user to leverage its functionality along with convenient Python \& NumPy!
