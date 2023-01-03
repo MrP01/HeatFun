@@ -9,14 +9,13 @@
 \renewcommand{\baselinestretch}{1.25}
 
 \usepackage{prettytex/math}
-\usepackage{prettytex/math-theorems}
+\usepackage[nameinlink]{cleveref}
+\usepackage[cleveref]{prettytex/math-theorems}
 \usepackage{prettytex/mathematicians}
 \usepackage{prettytex/gfx}
 \usepackage{prettytex/code}
 \usepackage{prettytex/pseudo}
 \usepackage{prettytex/thesis}
-\usepackage{cleveref}
-\usepackage{lipsum}
 
 \setlength{\headheight}{19.53pt}
 \setlength{\headsep}{1.8em}
@@ -144,8 +143,8 @@
   \begin{theorem}{Chebyshev Recursion Formula}{chebrecursion}
     The Chebyshev polyomials satisfy the three-term recurrence relation $$T_{k+1}(x) = 2x T_k(x) - T_{k-1}(x) \,.$$
   \end{theorem}
-  \begin{proof}{\autoref{thm:chebrecursion}}
-    For $k > 1$,
+  \begin{proof}
+    For $k > 1$, we have
     \begin{align*}
       2x T_k(x) - T_{k-1}(x) & = 2x \frac{1}{2} (z^k + z^{-k}) - \frac{1}{2} (z^{k-1} + z^{-(k-1)})                       \\
                              & = 2 \frac{1}{2}(z + z^{-1}) \frac{1}{2}(z^k + z^{-k}) - \frac{1}{2} (z^{k-1} + z^{-k+1})   \\
@@ -226,7 +225,7 @@
           We will look at an actual implementation of this in the next subsection.
 
     \item \textbf{Using the Discrete Cosine Transform}.
-          Recognise the structure of the above integral (\autoref{thm:cheb-coefficient-integrals}) for $k \neq 0$ as a cosine transform of the function $f \circ cos$. Let $g(t) = f(\cos(t))$ for $t \in [0, \pi]$ and $0$ otherwise.
+          Recognise the structure of the above integral (\cref{thm:cheb-coefficient-integrals}) for $k \neq 0$ as a cosine transform of the function $f \circ cos$. Let $g(t) = f(\cos(t))$ for $t \in [0, \pi]$ and $0$ otherwise.
 
           \begin{definition}{Cosine Transform}{costrans}
             $$\hat{g}(\omega) := \int_{-\infty}^{\infty} g(t) \cos(\omega t) \ddt, \quad g: \R \mapsto \R, \quad \hat{g}: \R \mapsto \R$$
@@ -242,7 +241,7 @@
           Numerically speaking, a significant improvement to these two approaches can be made by using the \emph{Barycentric interpolation formula in Chebyshev points} \parencite{atap}. Given more time, one should implement this feature in TschebFun as well.
   \end{enumerate}
 
-  The first two methods demonstrate why it is sensible to choose to sample a function in \textit{chebpoints} (\autoref{def:chebpoints}, also confer \autoref{fig:chebpoints}) instead of equispaced points, simply because the mathematics works out nicely in this basis.
+  The first two methods demonstrate why it is sensible to choose to sample a function in \textit{chebpoints} (\cref{def:chebpoints}, also confer \cref{fig:chebpoints}) instead of equispaced points, simply because the mathematics works out nicely in this basis.
   A much more fundamental numerical insight relating to the choice of points is the \emph{Runge phenomenon} \parencite{runge-phenomenon}.
 
   \begin{definition}{Chebyshev points}{chebpoints}
@@ -260,17 +259,17 @@
   \end{figure}
 
   \subsection{A Numerical Issue}
-  Wanting to interpolate through $N$ points, namely through $\{(x_j, f(x_j)) \;|\; x_j \in X_N\}$, the corresponding truncated Chebyshev series will have $N$ coefficients. To approximate the coefficient integral, we use \autoref{thm:integralapprox} without the limit.
+  Wanting to interpolate through $N$ points, namely through $\{(x_j, f(x_j)) \;|\; x_j \in X_N\}$, the corresponding truncated Chebyshev series will have $N$ coefficients. To approximate the coefficient integral, we use \cref{thm:integralapprox} without the limit.
 
-  Even approximately speaking, the rectangular integral rule in application to \autoref{thm:cheb-coefficient-integrals} does, in some situations, not approach the correct coefficients.
-  We now consider three different variations of the rectangular rule integral approximation, see why none of them are optimal in this situation and look at a possible resolution to this numerical issue, inspired by the DCT (\autoref{def:dct}).
+  Even approximately speaking, the rectangular integral rule in application to \cref{thm:cheb-coefficient-integrals} does, in some situations, not approach the correct coefficients.
+  We now consider three different variations of the rectangular rule integral approximation, see why none of them are optimal in this situation and look at a possible resolution to this numerical issue, inspired by the DCT (cf. \cref{def:dct}).
 
   Intuitively, the problem is related to the endpoints of the interval $[0, \pi]$, the corresponding areas under the curve we aim to integrate and symmetry.
   In the following, consider the (near-) simplest case $N = 2$ and $f(x) = x$.
   The analytical solution is $a_0 = 0$ and $a_1 = 1$.
 
   \begin{itemize}
-    \item With $\Theta_N$ as in \autoref{def:chebpoints}, consider the issue that
+    \item With $\Theta_N$ as in \cref{def:chebpoints}, consider the issue that
           $$a_1 = \frac{2}{\pi} \int_{0}^{\pi} \cos^2(\theta) \dd\theta \approx \frac{2}{N} \sum_{j=0}^{N-1} \cos^2\left(\frac{j \pi}{N-1}\right) = \frac{2}{2} \left(\cos^2(0) + \cos^2(\pi)\right) = 2 \neq 1 \,.$$
     \item Instead sampling at $\left\{\cos\left(\frac{j\pi}{N}\right) \;\big|\; j = 0, ..., N-1\right\}$,
           $$a_0 = \frac{1}{\pi} \int_0^\pi \cos(\theta) \dd\theta \approx \frac{1}{N} \sum_{j=0}^{N-1} \cos(\frac{j\pi}{N}) = \frac{1}{2} \left(\cos(0) + \cos(\pi/2)\right) = \frac{1}{2} \neq 0 \,.$$
@@ -279,13 +278,13 @@
   \end{itemize}
 
   Of course, the above approximations for $a_0$ and $a_1$ are exactly what they claim to be, approximations.
-  And indeed, for larger and larger $N$, they will converge to the correct coefficients according to \autoref{thm:integralapprox}.
+  And indeed, for larger and larger $N$, they will converge to the correct coefficients according to \cref{thm:integralapprox}.
   But we are not only interested in cases where $N \gg 1$ but also a smaller number of interpolation points.
 
   Similarly, as a small extension to the rectangular integral rule, one can consider the trapezoidal rule which fixes the issue with $N = 2$, but has similar accuracy issues for larger $N$.
 
   So we cannot use normal chebpoints for this interpolation method.
-  One way to fix this issue is to use \emph{modified chebpoints} (\autoref{def:mod-chebpoints}) as in the DCT-II, leveraging half-way points \parencite{CombTrig}.
+  One way to fix this issue is to use \emph{modified chebpoints} (\cref{def:mod-chebpoints}) as in the DCT-II, leveraging half-way points \parencite{CombTrig}.
 
   \begin{definition}{Modified Chebyshev points}{mod-chebpoints}
     $$\tilde{\Theta}_N := \left\{\theta_j := \frac{(j + \frac{1}{2})\pi}{N-1} \;\bigg|\; j = 0, ..., N-1\right\} \,,$$
@@ -303,7 +302,7 @@
 
   \subsection{The Interpolation Algorithm}
   Implementing the rectangular integral rule, TschebFun begins by computing $a_0$ as the sum of all $y$, normalised by $\frac{1}{N}$.
-  We compute the remaining coefficients in a for-loop, directly according to \autoref{eq:coefficient-formula}.
+  We compute the remaining coefficients in a for-loop, directly according to \cref{eq:coefficient-formula}.
   The input, $\vec{y} \in \R^N$ is a vector of function values sampled at the modified Chebyshev points $\tilde{X}_N$.
   \begin{minted}{cpp}
     TschebFun TschebFun::interpolantThrough(Vector y) {
@@ -403,9 +402,9 @@
     \Sigma_1 + \Sigma_2 + \underbrace{\left((-1)^{N-2} + 1\right)}_{\in \{0, 2\}} a_{N-2} + \underbrace{\left((-1)^{N-1} + 1\right)}_{\in \{0, 2\}} a_{N-1} = l + r \label{eq:boundary-equation}
   \end{equation}
 
-  For $N$ even: \autoref{eq:boundary-equation} has one unkown $a_{N-2} = \frac{l+r-\Sigma_1-\Sigma_2}{2},\; a_{N-1} = r - a_{N-2} - \Sigma_2$.
+  For $N$ even: \Cref{eq:boundary-equation} has one unkown $a_{N-2} = \frac{l+r-\Sigma_1-\Sigma_2}{2},\; a_{N-1} = r - a_{N-2} - \Sigma_2$.
 
-  For $N$ odd: \autoref{eq:boundary-equation} has one unkown $a_{N-1} = \frac{l+r-\Sigma_1-\Sigma_2}{2},\; a_{N-2} = r - a_{N-1} - \Sigma_2$.
+  For $N$ odd: \Cref{eq:boundary-equation} has one unkown $a_{N-1} = \frac{l+r-\Sigma_1-\Sigma_2}{2},\; a_{N-2} = r - a_{N-1} - \Sigma_2$.
 
   We apply this coefficient modification once after each iteration to stay consistent with given boundary conditions.
   We are now ready for the main solver!
@@ -458,7 +457,7 @@ end
   One more thing is missing though, given the coefficients $\vec{a}^{(T)}$ we also want to evaluate the Chebyshev series $u^{(T)} \in \mathbb{T}_N$ on some $x \subset [-1, 1]$!
 
   \subsection{Evaluation: The Clenshaw Algorithm}
-  For this purpose, let us recall the recurrence relation we proved in the very beginning, \autoref{thm:chebrecursion}.
+  For this purpose, let us recall the recurrence relation we proved in the very beginning, \cref{thm:chebrecursion}.
   It turns out that it follows the more general Clenshaw recurrence form, whom the algorithm also borrows its name from \parencite[172-178]{art-of-sci-comp}.
   \begin{theorem}{Clenshaw recurrence relation}{clenshaw-recurrence}
     If $f(x) = \sum_{k=0}^N a_k F_k(x)$ and there exists a three-term recursion of the form
@@ -468,7 +467,7 @@ end
     to finally arrive at $f(x) = a_0F_0(x)+y_1F_1(x)+\beta(1,x)F_0(x)y_2$.
   \end{theorem}
 
-  From \autoref{thm:chebrecursion} we identify $\alpha(n, x) = 2x$ and $\beta(n, x) = -1$ to arrive at the following special case for Chebyshev series:
+  From \cref{thm:chebrecursion} we identify $\alpha(n, x) = 2x$ and $\beta(n, x) = -1$ to arrive at the following special case for Chebyshev series:
   \begin{minted}{cpp}
     Vector TschebFun::evaluateOn(Vector x) {
       Vector U_kp2;
@@ -483,7 +482,7 @@ end
     }
   \end{minted}
 
-  Essentially, the idea is simple: Using the recurrence relation (\autoref{thm:chebrecursion}) to our advantage and tracking the sum of $a_k T_k(x)$ on the way from $k = N-2$ to $k=0$, which is why we call it the backward Clenshaw recurrence.
+  Essentially, the idea is simple: Using the recurrence relation (\cref{thm:chebrecursion}) to our advantage and tracking the sum of $a_k T_k(x)$ on the way from $k = N-2$ to $k=0$, which is why we call it the backward Clenshaw recurrence.
   The above implementation can work with vector-valued $\vec{x}$.
 
   \subsection{Analysis: Interface to Python}
@@ -545,7 +544,7 @@ end
   The upside is that this issue can always be remedied by reducing the time-step (ultimately, this was the reason for adding the adaptive time-step optimisation).
 
   Given more time, one should implement a linear multistep method instead of simple Forward Euler.
-  Given even more time, it would be interesting to compare the three mentioned coefficient computation methods listed in \autoref{subsection:numerical-coeffs} and look at the potential speed-up facilitated by the FFT.
+  Given even more time, it would be interesting to compare the three mentioned coefficient computation methods listed in \cref{subsection:numerical-coeffs} and look at the potential speed-up facilitated by the FFT.
 
   \printbibliography
 
