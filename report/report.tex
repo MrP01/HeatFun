@@ -31,7 +31,6 @@
 \author{Candidate \candidatenumber}
 \date{\today}
 
-\newcommand*{\todo}{\colorbox{green}}
 \setminted{fontsize=\footnotesize}
 
 % Outline:
@@ -48,15 +47,16 @@
 % ✅ - Method one: Rectangular integral approx. rule
 % ✅ - Method two: DCT
 % ✅ - Method three: Barycentric formula
-% Algorithm two: evaluateOn()
-% Numerics: Define Forward Euler
-% Algorithm three: differentiation of a Cheb series
+% ✅ Algorithm two: evaluateOn()
+% ✅ Numerics: Define Forward Euler
+% ✅ Algorithm three: differentiation of a Cheb series
 % - Method one: via DCT (todo...)
 % - Method two: via recursion formula
-% - Method three: via finite differences and repeated interpolantThrough()
-% Final application: interpolantThrough(), u_1 = alpha * dt * diff(diff(u_0)), evaluateOn()
-% Results
+% ✅ - Method three: via finite differences and repeated interpolantThrough()
+% ✅ Final application: interpolantThrough(), u_1 = alpha * dt * diff(diff(u_0)), evaluateOn()
+% ✅ Results
 % TODO: einheitliche Schreibweise ChebFun, Chebfun, chebfun, TschebFun, etc.
+% TODO: use cleveref
 
 \begin{document}
   \pagestyle{plain}
@@ -98,8 +98,8 @@
   \pagebreak
   \pagestyle{normal}
 
-  \tableofcontents
-  \pagebreak
+  % \tableofcontents
+  % \pagebreak
 
   \section{Motivation}
   Partial differential equations are notoriously hard to solve. One more possible approach to make way in this important class of problems is by the technique of spectral methods, incidentally closely related to finite element methods.
@@ -199,6 +199,7 @@
   Dealing with a numerical problem, we shall then approximate the above two integrals by the rectangular integral rule.
 
   \subsection{Numerical Computation of Coefficients}
+  \label{subsection:numerical-coeffs}
   As computers rarely allow us to store infinitely many coefficients $a_k$, we will work with the truncated Chebyshev series
   \begin{equation}
     f_N(x) = \sum_{k=0}^{N-1} a_k T_k(x), \quad k \in \{0, ..., N-1\},\quad N \in \N, N > 1
@@ -347,6 +348,13 @@
     u^{(t+\Delta t)} = u^{(t)} + \alpha \Delta t \cdot \mathcal{D}_N^2 u^{(t)} \,.
   \end{align*}
 
+  \paragraph{Adaptive time-steps}
+  An optional optimisation to Forward-Euler that was implemented in HeatFun as well, is an adaptive time-step that prevents coefficient explosion by adjusting the time-step $\Delta t$ after each iteration by
+  $$(\Delta t)_{\text{next}} = \left(\frac{\delta}{\norm{\vec{a}^{(t+\Delta t)} - \vec{a}^{(t)}}}\right)^{\frac{1}{5}} \cdot \Delta t \,,$$
+  with 'goal' parameter $\delta \in \R$.
+  The effect of this is simple: if the change (as measured by the absolute-value norm $\norm{\cdot}$) between two iterations is larger than $\delta$, the time step will be reduced. Otherwise, increased.
+  $\delta$ can be adjusted in the graphical user interface upon activation of the optimisation.
+
   \subsection{Differentiation in the Spatial Direction}
   So now, our aim is to find an explicit relation between the coefficients of the derivative of a function $u^{(t)} \in \mathbb{T}_N$ and the original coefficients.
   As differentiation is a linear operation, which can be especially well understood from this very fact, there exists a matrix $D_N \in \R^{N-1 \times N}$ corresponding to the differentiation operation $\mathcal{D}_N$.
@@ -398,9 +406,12 @@
 
   For $N$ odd: \autoref{eq:boundary-equation} has one unkown $a_{N-1} = \frac{l+r-\Sigma_1-\Sigma_2}{2},\; a_{N-2} = r - a_{N-1} - \Sigma_2$.
 
-  \paragraph{Adaptive time-steps}
+  We apply this coefficient modification once after each iteration to stay consistent with given boundary conditions.
+  We are now ready for the main solver!
 
   \subsection{The Spectral Heat Equation Solver}
+  Combining the above insights and algorithms, we finally arrive at the full solver:
+
   \begin{algorithm}[language=pseudo,caption={\centering Our final solving algorithm}]
 input: $\vec{u_0} \in \R^N$, s.t. $\{\vec{u_0}\}_j = u_0(x_j) \; \forall x_j \in \tilde{X}_N$, final time $T \in \R^+$.
 output: $u^{(T)} \in \mathbb{T}_N$.
@@ -425,7 +436,7 @@ for ($t = 0$; $t \le T$; $t$ += $\Delta t$); do
 end
   \end{algorithm}
 
-  Including adaptive time-steps, part of the above algorithm is implemented in C++ as
+  Perhaps simpler, more compact and including adaptive time-steps, part of the above algorithm is implemented in C++ as
   \begin{minted}{cpp}
     void HeatSolver::iterate() {
       // base step, leaves two degrees of freedom a_{N}, a_{N-1}
@@ -437,17 +448,26 @@ end
       if (optimisations.adaptiveDt) {
         double change = xt::sum(xt::abs(currentU.coefficients - previousU.coefficients))();
         dt *= pow(optimisations.adaptiveGoalDu / change, 0.2);
-        std::cout << "dt: " << dt << std::endl;
       }
     }
   \end{minted}
 
   \section{Analysis, Comparison and Results}
-  \subsection{Evaluation: The Clenshaw Algorithm}
-  \begin{theorem}{Clenshaw recurrence relation}{clenshaw-recurrence}
-  \end{theorem}
-  \parencite[172-178]{art-of-sci-comp}.
+  The implementation is complete and we are ready to look at our results.
+  One more thing is missing though, given the coefficients $\vec{a}^{(T)}$ we also want to evaluate the Chebyshev series $u^{(T)} \in \mathbb{T}_N$ on some $\vec{x} \subset [-1, 1]$!
 
+  \subsection{Evaluation: The Clenshaw Algorithm}
+  For this purpose, let us recall the recurrence relation we proved in the very beginning, \autoref{thm:chebrecursion}.
+  It turns out that it follows the more general Clenshaw recurrence form, whom the algorithm also borrows its name from \parencite[172-178]{art-of-sci-comp}.
+  \begin{theorem}{Clenshaw recurrence relation}{clenshaw-recurrence}
+    If $f(x) = \sum_{k=0}^N a_k F_k(x)$ and there exists a three-term recursion of the form
+    $$F_{n+1}(x)=\alpha(n,x) F_n(x) + \beta(n,x) F_{n-1}(x),\quad F_n: \R \mapsto \R, \quad \alpha, \beta \in \R \,,$$
+    then the value $f(x)$ can be computed by iteratively updating
+    $$y_k = \alpha(k,x)y_{k+1}+\beta(k+1,x)y_{k+2}+a_k \; \text{ with start } y_{N+2} = y_{N+1} = 0\,,$$
+    to finally arrive at $f(x) = a_0F_0(x)+y_1F_1(x)+\beta(1,x)F_0(x)y_2$.
+  \end{theorem}
+
+  From \autoref{thm:chebrecursion} we identify $\alpha(n, x) = 2x$ and $\beta(n, x) = -1$ to arrive at the following special case for Chebyshev series:
   \begin{minted}{cpp}
     Vector TschebFun::evaluateOn(Vector x) {
       Vector U_kp2;
@@ -462,8 +482,10 @@ end
     }
   \end{minted}
 
+  This implementation can even work with vector-valued $\vec{x}$.
+
   \subsection{Analysis: Interface to Python}
-  Extension to a Python module, using \texttt{pybind11}.
+  Another exciting aspect of HeatFun is its extension to a compiled Python module using \texttt{pybind11}\footnote{\url{https://pybind11.readthedocs.io/}}, which allows any user to leverage its functionality along with convenient Python \& NumPy!
 
   \begin{minted}{python}
     import heatfun, numpy as np
@@ -474,12 +496,17 @@ end
   \end{minted}
 
   \subsection{Comparison: ChebFun}
+  In order to verify the numerical results, we compare our solution with the one that the amazing Chebfun provides by means of the following script \parencite{exploring}:
   \inputminted{matlab}{../analysis/heatfun.m}
-  \parencite{exploring}
+
+  ChebFun provides a lot more versatile functionality for ODEs, but also PDEs, than demonstrated here.
+  Especially, it does not use Forward Euler to step through time, as HeatFun does.
 
   % TODO: runtime benchmarks? Maybe only interpolation and evaluation
 
+  \pagebreak
   \subsection{Results: On Target?}
+  This comparison yields the following results for a few interesting functions:
   % gaussian squared error: 8.622487716018498e-08
   % sines squared error: 1.0126407911934125e-05
   % radiation squared error: 0.00023109224612169596
@@ -489,43 +516,52 @@ end
   \begin{figure}[H]
     \centering
     \inputtikz{comparison-gaussian}
-    \caption{Comparison of heatfun and chebfun}
+    \caption{Comparison of heatfun and chebfun for solving the stated heat equation problem with $\alpha = 1$, $T = 0.01$, $N = 30$ and initial condition $u_0(x) = \e^{-12 x^2}$. The squared error between the two functions, evaluated in 500 points, is \num{8.6e-08}.}
   \end{figure}
 
   \begin{figure}[H]
     \centering
     \inputtikz{comparison-sines}
-    \caption{Comparison of heatfun and chebfun}
+    \caption{Comparison of heatfun and chebfun for solving the stated heat equation problem with $\alpha = 1$, $T = 0.01$, $N = 30$ and initial condition $u_0(x) = \sin((4x)^2) + \sin(4x)^2$. The squared error between the two functions, evaluated in 500 points, is \num{1.01e-05}.}
   \end{figure}
 
   \begin{figure}[H]
     \centering
     \inputtikz{comparison-tanh-kernel}
-    \caption{Comparison of heatfun and chebfun}
+    \caption{Comparison of heatfun and chebfun for solving the stated heat equation problem with $\alpha = 1$, $T = 0.01$, $N = 30$ and initial condition $u_0(x) = \tanh(-10x^4)$. The squared error between the two functions, evaluated in 500 points, is \num{1.06e-07}.}
   \end{figure}
 
-  \section{Outlook and Discussion}
-  Given more time, one should.
+  \section{Discussion and Outlook}
+  Generally, the solver works pretty well and efficiently in our given setting!
+  The interpolation procedure, although kept simple, produces coefficients that match those returned by Chebfun in MatLab up to 10 decimal places, at least for simple functions.
+  Of course, the interpolation accuracy is crucial for the accuracy of the end result.
+  If even $u_0 \in \mathbb{T}_N$, then the approximation is exact and the error is only inherited from Forward Euler, as the spatial derivative is exact (up to numerical round-off).
 
-  If even $u_0 \in \mathbb{T}_N$, then the approximation is exact and the error is inherited from Forward-Euler.
+  Some initial conditions, and especially high-degree Chebyshev series (i.e. high $N$) cause numerical issues with Forward Euler.
+  This is because the derivative of a polynomial simply gains higher and higher pre-factors for growing degrees of the monomials.
+  The effect is then amplified by the boundary conditions forced onto the highest-degree coefficients, sometimes leading to fairly high coefficients that will ruin our next iterate.
+  The upside is that this issue can always be remedied by reducing the time-step (ultimately, this was the reason for adding the adaptive time-step optimisation).
+
+  Given more time, one should implement a linear multistep method instead of simple Forward Euler.
+  Given even more time, it would be interesting to compare the three mentioned coefficient computation methods listed in \autoref{subsection:numerical-coeffs} and look at the potential speed-up facilitated by the FFT.
 
   \printbibliography
 
   \appendix
-  \section{Title of Appendix}
-  Appendices are definitely not necessary and assessors are not obliged to read them so only use them for non-vital text, figures or calculations.
-
+  \section{Some More Functions}
   \begin{figure}[H]
     \centering
     \inputtikz{comparison-radiation}
-    \caption{Comparison of heatfun and chebfun}
+    \caption{Comparison of heatfun and chebfun for solving the stated heat equation problem with $\alpha = 1$, $T = 0.01$, $N = 30$ and initial condition $u_0(x) = \tanh(-10x^4)$. The squared error between the two functions, evaluated in 500 points, is \num{2.31e-04}.}
   \end{figure}
 
   \begin{figure}[H]
     \centering
     \inputtikz{comparison-double-tanh}
-    \caption{Comparison of heatfun and chebfun}
+    \caption{Comparison of heatfun and chebfun for solving the stated heat equation problem with $\alpha = 1$, $T = 0.01$, $N = 30$ and initial condition $u_0(x) = \tanh(-10x^4)$. The squared error between the two functions, evaluated in 500 points, is \num{1.9e-04}.}
   \end{figure}
 
+  \section*{TschebFun's Class Definition}
+  To make the capabilities and perhaps some interior details of TschebFun more clear, here is its header file.
   \inputminted{cpp}{../solver/TschebFun.h}
 \end{document}
