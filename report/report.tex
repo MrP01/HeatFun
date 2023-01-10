@@ -34,8 +34,8 @@
 
 \setminted{fontsize=\footnotesize}
 \AfterEndEnvironment{minted}{\vspace*{-0.8cm}}
-
 \tikzexternalize[prefix=tikz/]
+\renewcommand{\operatorcolor}{black}
 
 % Outline:
 % ✅ Setting: define heat equation PDE problem (with BCs), explain series in x direction
@@ -61,6 +61,20 @@
 % ✅ Results
 % TODO: chebfun supports solving using both the spectral method as well as time-stepping methods [TAD14 - ChebFun guide].
 % TODO: D_N matrix is (N+1) x (N+1) or N x (N+1)??
+% TODO: use \tschebfun and \chebfun
+
+% Yuji:
+% - I think you could have many more references. You've got the key ones, but you can definitely add more, e.g. when you discuss Cheb-polynomials, computing coefficients, and more general discussions on spectral methods (besides Nick's) etc.
+% ✅ - I'm not sure eprint information is needed.
+% ✅ - Sigma missing in 1st line of last displayed equation on p.4.
+% ✅ - When referring to theorems, 'Theorem 2.2' not 'theorem 2.2'. Same for Definition XX, %Figure YY etc.
+% - 2.4 Definition, y not defined (or rather what DCT does isn't told)
+% ✅ - I'm not sure what 'absolute-value norm' is.
+% - I'm not sure what you're doing in Sec 3.2 is clear enough.
+% - Forward Euler is a natural first thing to try, but I'd mention its convergence is slow.
+% - Discussion on convergence would be a natural addition. Of course you can't do %everything in a special topic.
+% ✅ - You could use dashed lines in Figures 3-5 so one can see the three curves. (Of course the error plot helps clarify the situation.)
+% Well done--this is a real delight!
 
 \begin{document}
   \pagestyle{plain}
@@ -140,7 +154,7 @@
     for degree $k \in \N$. Then, $T_0(x) = 1$, $T_1(x) = x$, $T_2(x) = 2x^2-1$, and so on.
   \end{definition}
 
-  The above relations between $x$, $z$ and $\theta$ reveal fundamental connections between three famous basis sets: \textsc{Chebyshev}, \textsc{Laurent} and \textsc{Fourier}.
+  The above relations between $x$, $z$ and $\theta$ reveal fundamental connections between three famous basis sets: \textsc{Chebyshev}, \textsc{Laurent} and \textsc{Fourier} \parencite{atap}.
 
   There is a handy method of explicitly writing out the Chebyshev polynomials in $x$, namely by a three-step recursion with $T_0(x) = \cos(0) = 1$ and $T_1(x) = \cos(\theta) = x$.
 
