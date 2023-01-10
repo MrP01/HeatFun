@@ -2,7 +2,7 @@
 
 Exploring the :fire: heat equation :fire: as part of a Special Topic for Approximation of Functions.
 
-:rocket: **Solving PDEs using Spectral Methods in the Chebyshev basis by example of the Heat Equation.** :rocket:  
+:rocket: **Solving PDEs using Spectral Methods in the Chebyshev basis by example of the Heat Equation.** :rocket:
 A Special Topic on Approximation of Functions.
 
 ![Screenshot of the spectral heat equation solver](report/figures/screenshot.png)
@@ -24,10 +24,13 @@ make -j 4
 ```
 
 **To run the graphical user interface**:
+
 ```bash
 ./bin/main
 ```
+
 **For usage as a Python module**:
+
 ```python3
 import pathlib
 import sys

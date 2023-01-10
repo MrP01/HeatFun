@@ -31,7 +31,7 @@ repos:
           - --safe
           - --quiet
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.191
+    rev: v0.0.217
     hooks:
       - id: ruff
   - repo: https://github.com/pre-commit/pygrep-hooks

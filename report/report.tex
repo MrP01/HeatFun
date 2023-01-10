@@ -25,6 +25,8 @@
 \newcommand{\topictitle}{Solving PDEs using Spectral Methods in the Chebyshev basis \\ \large by example of the Heat Equation}
 \newcommand{\candidatenumber}{12345}
 \newcommand{\course}{Approximation of Functions}
+\newcommand{\tschebfun}{TschebFun}
+\newcommand{\heatfun}{HeatFun}
 
 \title{\topictitle}
 \author{Candidate \candidatenumber}
@@ -55,7 +57,8 @@
 % ✅ - Method three: via finite differences and repeated interpolantThrough()
 % ✅ Final application: interpolantThrough(), u_1 = alpha * dt * diff(diff(u_0)), evaluateOn()
 % ✅ Results
-% TODO: einheitliche Schreibweise ChebFun, Chebfun, chebfun, TschebFun, etc.
+% TODO: chebfun supports solving using both the spectral method as well as time-stepping methods [TAD14 - ChebFun guide].
+% TODO: D_N matrix is (N+1) x (N+1) or N x (N+1)??
 
 \begin{document}
   \pagestyle{plain}
@@ -295,7 +298,7 @@
   More details can be found in \cite{CombTrig}.
 
   \begin{equation}
-    a_k = \frac{2}{N} \sum_{j=0}^{N-1} f(x_j) \cos(k \theta_j), \quad \theta_j \in \tilde{\Theta}_N, \quad k > 0 \,.
+    a_k = \frac{2}{N} \sum_{j=0}^{N-1} f(x_j) \cos(k \theta_j), \quad \theta_j \in \tilde{\Theta}_N, \quad x_j = \cos(\theta_j), \quad k > 0 \,.
     \label{eq:coefficient-formula}
   \end{equation}
 
@@ -562,7 +565,7 @@ end
     \caption{Comparison of HeatFun and Chebfun for solving the stated heat equation problem with $\alpha = 1$, $T = 0.01$, $N = 30$ and initial condition $u_0(x) = \tanh(-10x^4)$. The squared error between the two functions, evaluated in 500 points, is \num{1.9e-04}.}
   \end{figure}
 
-  \section*{TschebFun's Class Definition}
+  \section{TschebFun's Class Definition}
   To make the capabilities and perhaps some internal details of \textcolor{themecolor3}{TschebFun} more clear, here is its header file.
   \inputminted{cpp}{../solver/TschebFun.h}
 \end{document}
