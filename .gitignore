@@ -33,3 +33,4 @@ build/
 stuff/
 .vscode/
 *.protected.pdf
+report/tikz/
