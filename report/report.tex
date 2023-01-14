@@ -25,8 +25,8 @@
 \newcommand{\topictitle}{Solving PDEs using Spectral Methods in the Chebyshev basis \\ \large by example of the Heat Equation}
 \newcommand{\candidatenumber}{12345}
 \newcommand{\course}{Approximation of Functions}
-\newcommand{\tschebfun}{TschebFun}
-\newcommand{\heatfun}{HeatFun}
+\newcommand{\tschebfun}{\textcolor{themecolor3}{TschebFun}\xspace}
+\newcommand{\heatfun}{\textcolor{themecolor3}{HeatFun}\xspace}
 
 \title{\topictitle}
 \author{Candidate \candidatenumber}
@@ -61,7 +61,6 @@
 % ✅ Results
 % TODO: chebfun supports solving using both the spectral method as well as time-stepping methods [TAD14 - ChebFun guide].
 % TODO: D_N matrix is (N+1) x (N+1) or N x (N+1)??
-% TODO: use \tschebfun and \chebfun
 
 % Yuji:
 % - I think you could have many more references. You've got the key ones, but you can definitely add more, e.g. when you discuss Cheb-polynomials, computing coefficients, and more general discussions on spectral methods (besides Nick's) etc.
@@ -103,7 +102,7 @@
       \end{cases}$$
     \vspace*{0.05cm}
 
-    The implementation, centered around what we will refer to as \textbf{\textcolor{themecolor3}{TschebFun}}, including three major algorithms \texttt{\textcolor{themecolor3}{TschebFun}::\textcolor{themecolor2}{interpolantThrough}()}, \texttt{\textcolor{themecolor3}{TschebFun}::\textcolor{themecolor2}{evaluateOn}()} and \texttt{\textcolor{themecolor3}{TschebFun}::\textcolor{themecolor2}{derivative}()}, is done manually in C++, extended to work as a Python module and for demonstration, even features a high-level graphical interface to play with.
+    The implementation, centered around what we will refer to as \textbf{\tschebfun}, including three major algorithms \texttt{\tschebfun::\textcolor{themecolor2}{interpolantThrough}()}, \texttt{\tschebfun::\textcolor{themecolor2}{evaluateOn}()} and \texttt{\tschebfun::\textcolor{themecolor2}{derivative}()}, is done manually in C++, extended to work as a Python module and for demonstration, even features a high-level graphical interface to play with.
     Finally, we will compare the numerical results with the output of \textit{Chebfun}'s high-level \texttt{pde15s()}.
   \end{abstract}
 
@@ -257,7 +256,7 @@
           Most significantly, this approach via the Discrete Cosine Transform can be sped up by means of the \emph{Fast Fourier Transform} \parencite{cooley-tukey-fft}.
 
     \item \textbf{Barycentric Interpolation Formula}.
-          Numerically speaking, a significant improvement to these two approaches can be made by using the \emph{Barycentric interpolation formula in Chebyshev points} \parencite{atap}. Given more time, one should implement this feature in \textcolor{themecolor3}{TschebFun} as well.
+          Numerically speaking, a significant improvement to these two approaches can be made by using the \emph{Barycentric interpolation formula in Chebyshev points} \parencite{atap}. Given more time, one should implement this feature in \tschebfun as well.
   \end{enumerate}
 
   The first two methods demonstrate why it is sensible to choose to sample a function in \textit{chebpoints} (\Cref{def:chebpoints}, also confer \Cref{fig:chebpoints}) instead of equispaced points.
@@ -310,7 +309,7 @@
     $$\tilde{X}_N := \{x_j := \cos(\theta_j) \;|\; \theta_j \in \Theta_N\} \,.$$
   \end{definition}
 
-  Our implementation, \texttt{\textcolor{themecolor3}{TschebFun}::\textcolor{themecolor2}{interpolantThrough}()}, uses these modified chebpoints to circumvent the above issues.
+  Our implementation, \texttt{\tschebfun::\textcolor{themecolor2}{interpolantThrough}()}, uses these modified chebpoints to circumvent the above issues.
   In short, the half-way point integral approximation is more accurate in this case and, for small $N$, gives the exact coefficients as expected.
   More details can be found in \cite{CombTrig}.
 
@@ -320,7 +319,7 @@
   \end{equation}
 
   \subsection{The Interpolation Algorithm}
-  Implementing the rectangular integral rule, \textcolor{themecolor3}{TschebFun} begins by computing $a_0$ as the sum of all $y$, normalised by $\frac{1}{N}$.
+  Implementing the rectangular integral rule, \tschebfun begins by computing $a_0$ as the sum of all $y$, normalised by $\frac{1}{N}$.
   We compute the remaining coefficients in a for-loop, directly according to \Cref{eq:coefficient-formula}.
   The input, $\vec{y} \in \R^N$ is a vector of function values sampled at the modified Chebyshev points $\tilde{X}_N$.
   \begin{minted}{cpp}
@@ -368,7 +367,7 @@
   \end{align*}
 
   \paragraph{Adaptive time-steps}
-  An optional optimisation to Forward-Euler that was implemented in HeatFun as well, is an adaptive time-step that prevents coefficient explosion by adjusting the time-step $\Delta t$ after each iteration by
+  An optional optimisation to Forward-Euler that was implemented in \heatfun as well, is an adaptive time-step that prevents coefficient explosion by adjusting the time-step $\Delta t$ after each iteration by
   $$(\Delta t)_{\text{next}} = \left(\frac{\delta}{\norm{\vec{a}^{(t+\Delta t)} - \vec{a}^{(t)}}_1}\right)^{\frac{1}{5}} \cdot \Delta t \,,$$
   with 'goal' parameter $\delta \in \R$.
   The effect of this is simple: if the change (as measured by the 1-norm $\norm{\cdot}_1$) between two iterations is larger than $\delta$, the time step will be reduced. Otherwise, increased.
@@ -382,7 +381,7 @@
   The explicit form of this differentiation matrix can be found in chapter 6 of \cite{spectralmethods}.
   Our approach shall be a bit different, the algorithmic implementation can be made more space- and time-efficient by performing an iteration over the coefficients directly.
 
-  In \textcolor{themecolor3}{TschebFun}, it is implemented as follows, as adapted from \cite{numpy}:
+  In \tschebfun, it is implemented as follows, as adapted from \cite{numpy}:
   \begin{minted}{cpp}
     TschebFun TschebFun::derivative() {
       int n = coefficients.size();
@@ -505,7 +504,7 @@ end
   The above implementation can work with vector-valued $\vec{x}$.
 
   \subsection{Analysis: Interface to Python}
-  Another exciting aspect of HeatFun is its extension to a compiled Python module using \texttt{pybind11}\footnote{\url{https://pybind11.readthedocs.io/}}, which allows any user to leverage its functionality along with convenient Python \& NumPy!
+  Another exciting aspect of \heatfun is its extension to a compiled Python module using \texttt{pybind11}\footnote{\url{https://pybind11.readthedocs.io/}}, which allows any user to leverage its functionality along with convenient Python \& NumPy!
 
   \begin{minted}{python}
     import heatfun, numpy as np
@@ -520,7 +519,7 @@ end
   \inputminted{matlab}{../analysis/heatfun.m}
 
   Chebfun provides a lot more versatile functionality for ODEs, but also PDEs, than demonstrated here.
-  Especially, it does not use Forward Euler to step through time, as HeatFun does.
+  Especially, it does not use Forward Euler to step through time, as \heatfun does.
 
   % TODO: runtime benchmarks? Maybe only interpolation and evaluation
 
@@ -536,19 +535,19 @@ end
   \begin{figure}[H]
     \centering
     \inputtikz{comparison-gaussian}
-    \caption{Comparison of HeatFun and Chebfun for solving the stated heat equation problem with $\alpha = 1$, $T = 0.01$, $N = 30$ and initial condition $u_0(x) = \e^{-12 x^2}$. The squared error between the two functions, evaluated in 500 points, is \num{8.6e-08}.}
+    \caption{Comparison of \heatfun and Chebfun for solving the stated heat equation problem with $\alpha = 1$, $T = 0.01$, $N = 30$ and initial condition $u_0(x) = \e^{-12 x^2}$. The squared error between the two functions, evaluated in 500 points, is \num{8.6e-08}.}
   \end{figure}
 
   \begin{figure}[H]
     \centering
     \inputtikz{comparison-sines}
-    \caption{Comparison of HeatFun and Chebfun for solving the stated heat equation problem with $\alpha = 1$, $T = 0.01$, $N = 30$ and initial condition $u_0(x) = \sin((4x)^2) + \sin(4x)^2$. The squared error between the two functions, evaluated in 500 points, is \num{1.01e-05}.}
+    \caption{Comparison of \heatfun and Chebfun for solving the stated heat equation problem with $\alpha = 1$, $T = 0.01$, $N = 30$ and initial condition $u_0(x) = \sin((4x)^2) + \sin(4x)^2$. The squared error between the two functions, evaluated in 500 points, is \num{1.01e-05}.}
   \end{figure}
 
   \begin{figure}[H]
     \centering
     \inputtikz{comparison-tanh-kernel}
-    \caption{Comparison of HeatFun and Chebfun for solving the stated heat equation problem with $\alpha = 1$, $T = 0.01$, $N = 30$ and initial condition $u_0(x) = \tanh(-10x^4)$. The squared error between the two functions, evaluated in 500 points, is \num{1.06e-07}.}
+    \caption{Comparison of \heatfun and Chebfun for solving the stated heat equation problem with $\alpha = 1$, $T = 0.01$, $N = 30$ and initial condition $u_0(x) = \tanh(-10x^4)$. The squared error between the two functions, evaluated in 500 points, is \num{1.06e-07}.}
   \end{figure}
 
   \section{Discussion and Outlook}
@@ -564,7 +563,7 @@ end
 
   Given more time, one should implement a linear multistep method instead of simple Forward Euler.
   Given even more time, it would be interesting to compare the three mentioned coefficient computation methods listed in \Cref{subsection:numerical-coeffs} and look at the potential speed-up facilitated by the FFT.
-  Following from there, another important aspect would be to find a good way of quantifying the interpolation accuracy for \textit{any} input using the method implemented in \textcolor{themecolor3}{TschebFun}, and analyse numerical stability in a detailed fashion.
+  Following from there, another important aspect would be to find a good way of quantifying the interpolation accuracy for \textit{any} input using the method implemented in \tschebfun, and analyse numerical stability in a detailed fashion.
 
   \printbibliography
 
@@ -573,16 +572,16 @@ end
   \begin{figure}[H]
     \centering
     \inputtikz{comparison-radiation}
-    \caption{Comparison of HeatFun and Chebfun for solving the stated heat equation problem with $\alpha = 1$, $T = 0.01$, $N = 30$ and initial condition $u_0(x) = \tanh(-10x^4)$. The squared error between the two functions, evaluated in 500 points, is \num{2.31e-04}.}
+    \caption{Comparison of \heatfun and Chebfun for solving the stated heat equation problem with $\alpha = 1$, $T = 0.01$, $N = 30$ and initial condition $u_0(x) = \tanh(-10x^4)$. The squared error between the two functions, evaluated in 500 points, is \num{2.31e-04}.}
   \end{figure}
 
   \begin{figure}[H]
     \centering
     \inputtikz{comparison-double-tanh}
-    \caption{Comparison of HeatFun and Chebfun for solving the stated heat equation problem with $\alpha = 1$, $T = 0.01$, $N = 30$ and initial condition $u_0(x) = \tanh(-10x^4)$. The squared error between the two functions, evaluated in 500 points, is \num{1.9e-04}.}
+    \caption{Comparison of \heatfun and Chebfun for solving the stated heat equation problem with $\alpha = 1$, $T = 0.01$, $N = 30$ and initial condition $u_0(x) = \tanh(-10x^4)$. The squared error between the two functions, evaluated in 500 points, is \num{1.9e-04}.}
   \end{figure}
 
   \section{TschebFun's Class Definition}
-  To make the capabilities and perhaps some internal details of \textcolor{themecolor3}{TschebFun} more clear, here is its header file.
+  To make the capabilities and perhaps some internal details of \tschebfun more clear, here is its header file.
   \inputminted{cpp}{../solver/TschebFun.h}
 \end{document}
