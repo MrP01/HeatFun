@@ -215,11 +215,11 @@
     A different approach for the derivation of the explicit coefficient integrals can be found in \cite{atap} along with a complex analysis styled proof.
   \end{proof}
 
-  Dealing with a numerical problem, we shall then approximate the above two integrals by the rectangular integral rule \parencite{bonthuis-cp}.
+  Given the numerical setting, we shall then approximate the above two integrals by the rectangular integral rule \parencite{bonthuis-cp}.
 
   \subsection{Numerical Computation of Coefficients}
   \label{subsection:numerical-coeffs}
-  As computers rarely allow us to store infinitely many coefficients $a_k$, we will work with the truncated \chebyshev series
+  As computers do not allow us to store infinitely many coefficients $a_k$, we will work with the truncated \chebyshev series
   \begin{equation}
     f_N(x) = \sum_{k=0}^{N-1} a_k T_k(x), \quad k \in \{0, ..., N-1\},\quad N \in \N, N > 1\,,
     \label{eq:truncated-cheb-series}
@@ -258,7 +258,7 @@
           Most significantly, this approach via the Discrete Cosine Transform can be sped up by means of the \emph{Fast Fourier Transform} \parencite{cooley-tukey-fft}.
 
     \item \textbf{Barycentric Interpolation Formula}.
-          Numerically speaking, a significant improvement to these two approaches can be made by using the \emph{Barycentric interpolation formula in Chebyshev points} \parencite{atap}. Given more time, one should implement this feature in \tschebfun as well.
+          Numerically speaking, a significant improvement to these two approaches can be made by using the \emph{Barycentric interpolation formula in Chebyshev points} \parencite{atap}. A future version of \tschebfun will utilise this method of computation of coefficients as well.
   \end{enumerate}
 
   The first two methods demonstrate why it is sensible to choose to sample a function in \textit{\chebyshev points} (\Cref{def:chebpoints}, also confer \Cref{fig:chebpoints}) instead of equispaced points.
@@ -301,10 +301,10 @@
   And indeed, for larger and larger $N$, they will converge to the correct coefficients according to \Cref{thm:integralapprox}.
   However, we are not only interested in cases where $N \gg 1$ but also a smaller number of interpolation points.
 
-  Similarly, as a small extension to the rectangular integral rule, one can consider the trapezoidal rule which fixes the issue with $N = 2$, but has similar accuracy issues for larger $N$.
+  Similarly, as a small extension to the rectangular integral rule, one can consider the trapezoidal rule which mitigates the issue with $N = 2$, but has similar accuracy issues for larger $N$.
 
-  So we cannot use \chebyshev points as in \Cref{def:chebpoints} for this interpolation method.
-  One way to fix this issue is to use \emph{modified \chebyshev points} (\Cref{def:mod-chebpoints}) as in the DCT-II, leveraging half-way points \parencite{CombTrig}.
+  Given these major shortcomings for small $N$, we cannot use \chebyshev points as in \Cref{def:chebpoints} for this interpolation method.
+  One way of mending this issue is to use \emph{modified \chebyshev points} (\Cref{def:mod-chebpoints}) as in the DCT-II, leveraging half-way points \parencite{CombTrig}.
 
   \begin{definition}{Modified Chebyshev points}{mod-chebpoints}
     % Let $\tilde{\Theta}_N$ denote the modified equispaced, and $\tilde{X}_N$ the modified Chebyshev points
@@ -377,7 +377,7 @@
 
   \subsection{Differentiation in the Spatial Direction}
   So now, our aim is to find an explicit relation between the coefficients of the derivative of a function $u^{(t)} \in \mathbb{T}_N$ and the original coefficients.
-  As differentiation is a linear operation, which can be especially well understood from this very fact, there exists a matrix $D_N \in \R^{(N-1) \times N}$ corresponding to the differentiation operation $\mathcal{D}_N$.
+  Differentiation is a linear operation, which can be especially well understood from this very fact, there exists a matrix $D_N \in \R^{(N-1) \times N}$ corresponding to the differentiation operation $\mathcal{D}_N$.
   $$\text{For any } u \in \mathbb{T}_N,\, u(x) = \sum_{k=0}^{N-1} a_k T_k(x), \quad u' = \mathcal{D}_N u \;\Leftrightarrow\; \vec{a}' = D_N \vec{a} \,.$$
 
   Note that this differentiation matrix operates between the coefficients, not the function values as it is introduced in Chapter 6 of \cite{spectralmethods}.
@@ -562,7 +562,7 @@ end
 
   \pagebreak
   \section{Discussion and Outlook}
-  Generally, the solver works well and efficiently in our given setting!
+  Generally, the solver works well and efficiently in our given setting.
   The interpolation procedure, although kept simple, produces coefficients that match those returned by Chebfun in MatLab up to 10 decimal places, at least for simple functions.
   Of course, the interpolation accuracy is crucial for the accuracy of the end result.
   If even $u_0 \in \mathbb{T}_N$, then the approximation is exact and the error is only inherited from Forward Euler (only $\mathcal{O}(\Delta t)$), as the spatial derivative is exact (up to numerical round-off).
