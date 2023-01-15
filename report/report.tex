@@ -61,19 +61,19 @@
 % ✅ Final application: interpolantThrough(), u_1 = alpha * dt * diff(diff(u_0)), evaluateOn()
 % ✅ Results
 % TODO: chebfun supports solving using both the spectral method as well as time-stepping methods [TAD14 - ChebFun guide].
-% TODO: D_N matrix is (N+1) x (N+1) or N x (N+1)??
+% ✅ D_N matrix is (N+1) x (N+1) or N x (N+1)??
 
 % Yuji:
-% - I think you could have many more references. You've got the key ones, but you can definitely add more, e.g. when you discuss Cheb-polynomials, computing coefficients, and more general discussions on spectral methods (besides Nick's) etc.
-% ✅ - I'm not sure eprint information is needed.
-% ✅ - Sigma missing in 1st line of last displayed equation on p.4.
-% ✅ - When referring to theorems, 'Theorem 2.2' not 'theorem 2.2'. Same for Definition XX, %Figure YY etc.
-% - 2.4 Definition, y not defined (or rather what DCT does isn't told)
-% ✅ - I'm not sure what 'absolute-value norm' is.
-% - I'm not sure what you're doing in Sec 3.2 is clear enough.
-% - Forward Euler is a natural first thing to try, but I'd mention its convergence is slow.
-% - Discussion on convergence would be a natural addition. Of course you can't do %everything in a special topic.
-% ✅ - You could use dashed lines in Figures 3-5 so one can see the three curves. (Of course the error plot helps clarify the situation.)
+% I think you could have many more references. You've got the key ones, but you can definitely add more, e.g. when you discuss Cheb-polynomials, computing coefficients, and more general discussions on spectral methods (besides Nick's) etc.
+% ✅ I'm not sure eprint information is needed.
+% ✅ Sigma missing in 1st line of last displayed equation on p.4.
+% ✅ When referring to theorems, 'Theorem 2.2' not 'theorem 2.2'. Same for Definition XX, Figure YY etc.
+% 2.4 Definition, y not defined (or rather what DCT does isn't told)
+% ✅ I'm not sure what 'absolute-value norm' is.
+% I'm not sure what you're doing in Sec 3.2 is clear enough.
+% ✅ Forward Euler is a natural first thing to try, but I'd mention its convergence is slow.
+% ✅ Discussion on convergence would be a natural addition. Of course you can't do everything in a special topic.
+% ✅ You could use dashed lines in Figures 3-5 so one can see the three curves. (Of course the error plot helps clarify the situation.)
 % Well done--this is a real delight!
 
 \begin{document}
@@ -130,7 +130,7 @@
   \begin{itemize}
     \item Using the separation ansatz
           $$u(x, t) = \underline{X}(x) \underline{T}(t), \quad \underline{X}: [-1, 1] \mapsto \R, \quad \underline{T}: [0, T] \mapsto \R$$
-          one obtains a first- and second-order constant-coefficient ordinary differential equation in $t$ and $x$, respectively. Of course, this is only applicable to suitable initial conditions.
+          one obtains a first- and second-order constant-coefficient ordinary differential equation in $t$ and $x$, respectively. These can be solved individually and recombined into $u(x, t)$. Of course, this is only applicable to suitable initial conditions.
 
     \item By Fourier-analysis: Highly similar to our approach below, but with representation in a different basis, and potentially even simpler: differentiation simply multiplies the Fourier coefficients by $\i k$, with $k$ the wave number. The solution is obtained in Fourier series representation. This is a spectral method!
 
@@ -175,17 +175,17 @@
   \subsection{An Orthogonal Basis}
   The \chebyshev polynomials also satisfy an \emph{orthogonality relation},
   $$\langle T_m, T_n \rangle := \int_{-1}^1 T_m(x) T_n(x) \frac{1}{\sqrt{1-x^2}} \ddx = \int_{\pi}^{0} \cos(m \theta) \cos(n \theta) \frac{-\sin(\theta)}{\sqrt{1-\cos^2(\theta)}} \dd\theta \,,$$
-  which becomes, with the fitting substitution $x = \cos(\theta)$ and $\ddx = -\sin(\theta) \dd\theta$,
+  which becomes, by the fitting substitution $x = \cos(\theta)$ and $\ddx = -\sin(\theta) \dd\theta$,
   \begin{align*}
-    \langle T_m, T_n \rangle & = \int_0^\pi T_m(\cos \theta) T_n(\cos \theta) \frac{\sin \theta}{\sin \theta}\dd\theta = \int_0^\pi \cos(m \theta) \cos(n \theta) \dd\theta                            \\
-                             & = \frac{1}{2} \int_0^\pi \big(\underbrace{\cos((m+n) \theta)}_{=\cos(2m\theta) \text{ for } m=n} + \underbrace{\cos((m-n) \theta)}_{=1 \text{ for } m=n}\big) \dd\theta
+    \langle T_m, T_n \rangle & = \int_0^\pi T_m(\cos \theta) T_n(\cos \theta) \frac{\sin \theta}{\sin \theta}\dd\theta = \int_0^\pi \cos(m \theta) \cos(n \theta) \dd\theta                               \\
+                             & = \frac{1}{2} \int_0^\pi \big(\underbrace{\cos((m+n) \theta)}_{=\cos(2m\theta) \text{ for } m=n} + \underbrace{\cos((m-n) \theta)}_{=1 \text{ for } m=n}\big) \dd\theta\,,
   \end{align*}
   along with the knowledge that $\int_0^\pi \cos(k \theta) \dd\theta = k^{-1} \left[\sin(k\theta)\right]_0^\pi = 0$ for $k \in \Z \backslash \{0\}$,
   $$\langle T_m, T_n \rangle = \int_0^\pi T_m(\cos \theta) T_n(\cos \theta) \dd\theta = \begin{cases}
       0     & \text{ for } m \neq n     \\
       \pi/2 & \text{ for } m = n \neq 0 \\
       \pi   & \text{ for } m = n = 0
-    \end{cases}$$
+    \end{cases}\,,$$
   which can be effectively utilised to define a function space $(\mathbb{T}, +, \cdot)$ in the \emph{orthogonal} basis of \chebyshev polynomials $\mathcal{T} := \{T_k\}_{k \in \N}$.
   Note that the operation $\langle \cdot, \cdot \rangle$ satisfies all axioms of an authentic inner product (linearity, etc.) over a function space due to the linearity of the integral.
 
@@ -202,7 +202,7 @@
                                  a_l \pi/2 & \text{ for } l \neq 0
                                \end{cases} \quad \text{ \textcolor{gray}{by orthogonality of the polynomials}}
   \end{align*}
-  which can easily be rearranged to give explicit relations for $a_0$ and $a_k$, summarised in the below theorem.
+  which can easily be rearranged to give explicit relations for $a_0$ and $a_k$, summarised in the theorem below.
   \begin{theorem}{Chebyshev series coefficient formula}{cheb-coefficient-integrals}
     For any $f \in \cC_L$, one can obtain the \chebyshev series coefficients $a_k$, $k \in \N$ as
     \begin{align*}
@@ -215,7 +215,7 @@
     A different approach for the derivation of the explicit coefficient integrals can be found in \cite{atap} along with a complex analysis styled proof.
   \end{proof}
 
-  Dealing with a numerical problem, we shall then approximate the above two integrals by the rectangular integral rule.
+  Dealing with a numerical problem, we shall then approximate the above two integrals by the rectangular integral rule \parencite{bonthuis-cp}.
 
   \subsection{Numerical Computation of Coefficients}
   \label{subsection:numerical-coeffs}
@@ -241,10 +241,10 @@
             For a function $f: [a, b] \mapsto \R$, its integral can be approximated by
             $$\int_a^b f(x) \ddx = \lim_{N \rightarrow \infty} \frac{b-a}{N} \sum_{j=0}^{N-1} f(x_j), \quad x_j := a + \frac{b-a}{N} j \,.$$
           \end{theorem}
-          We will look at an actual implementation of this in the next subsection.
+          As introduced in \cite{bonthuis-cp}, this is our method of choice.
 
     \item \textbf{Using the Discrete Cosine Transform}.
-          Recognise the structure of the above integral (\Cref{thm:cheb-coefficient-integrals}) for $k \neq 0$ as a cosine transform of the function $f \circ \cos$. Let $g(t) = f(\cos(t))$ for $t \in [0, \pi]$ and $0$ otherwise.
+          Recognising the structure of the above integral (\Cref{thm:cheb-coefficient-integrals}) for $k \neq 0$ as a cosine transform of the function $f \circ \cos$. Let $g(t) = f(\cos(t))$ for $t \in [0, \pi]$ and $0$ otherwise.
 
           \begin{definition}{Cosine Transform}{costrans}
             $$\hat{g}(\omega) := \int_{-\infty}^{\infty} g(t) \cos(\omega t) \ddt, \quad g: \R \mapsto \R, \quad \hat{g}: \R \mapsto \R$$
@@ -555,13 +555,17 @@ end
     \label{fig:example3}
   \end{figure}
 
-  The three example cases \Cref{fig:example1}, \Cref{fig:example1} and \Cref{fig:example3} demonstrate the correct behaviour of the solver, closesly matching those returned by Chebfun's \texttt{pde15s()}.
+  The three example cases \Cref{fig:example1}, \Cref{fig:example2} and \Cref{fig:example3} demonstrate the correct behaviour of the solver, closesly matching those returned by Chebfun's \texttt{pde15s()}. The mentioned \textit{squared error} refers to the squared (Euclidean) 2-norm of the difference between the two outcomes evaluated in $M = 500$ points.
 
+  As \heatfun only supports time-stepping methods, a direct runtime comparison to Chebfun's computation time would not be sensible as \heatfun's runtime linearly depends on the final time $T$.
+  One of many possible extensions to this Special Topic could be to perform a systematic analysis of only the interpolation procedure, considering both runtime and accuracy.
+
+  \pagebreak
   \section{Discussion and Outlook}
   Generally, the solver works well and efficiently in our given setting!
   The interpolation procedure, although kept simple, produces coefficients that match those returned by Chebfun in MatLab up to 10 decimal places, at least for simple functions.
   Of course, the interpolation accuracy is crucial for the accuracy of the end result.
-  If even $u_0 \in \mathbb{T}_N$, then the approximation is exact and the error is only inherited from Forward Euler, as the spatial derivative is exact (up to numerical round-off).
+  If even $u_0 \in \mathbb{T}_N$, then the approximation is exact and the error is only inherited from Forward Euler (only $\mathcal{O}(\Delta t)$), as the spatial derivative is exact (up to numerical round-off).
 
   Some initial conditions, and especially high-degree \chebyshev series (i.e. high $N$) cause numerical issues with Forward Euler.
   This is because the derivative of a polynomial simply gains higher and higher pre-factors for growing degrees of the monomials.
@@ -572,6 +576,7 @@ end
   Given even more time, it would be interesting to compare the three mentioned coefficient computation methods listed in \Cref{subsection:numerical-coeffs} and look at the potential speed-up facilitated by the FFT.
   Following from there, another important aspect would be to find a good way of quantifying the interpolation accuracy for \textit{any} input using the method implemented in \tschebfun, and analyse numerical stability in a detailed fashion.
 
+  \pagebreak
   \printbibliography
 
   \appendix
