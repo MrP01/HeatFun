@@ -21,21 +21,22 @@
 \setlength{\headsep}{1.8em}
 \setlength{\belowcaptionskip}{-12pt}
 \addbibresource{sources.bib}
-
-\newcommand{\topictitle}{Solving PDEs using Spectral Methods in the Chebyshev basis \\ \large by example of the Heat Equation}
-\newcommand{\candidatenumber}{12345}
-\newcommand{\course}{Approximation of Functions}
-\newcommand{\tschebfun}{\textcolor{themecolor3}{TschebFun}\xspace}
-\newcommand{\heatfun}{\textcolor{themecolor3}{HeatFun}\xspace}
-
-\title{\topictitle}
-\author{Candidate \candidatenumber}
-\date{\today}
-
 \setminted{fontsize=\footnotesize}
 \AfterEndEnvironment{minted}{\vspace*{-0.8cm}}
 \tikzexternalize[prefix=tikz/]
 \renewcommand{\operatorcolor}{black}
+
+\newcommand{\chebyshev}{\textsc{Chebyshev}\xspace}
+\newcommand{\tschebfun}{\textcolor{themecolor3}{TschebFun}\xspace}
+\newcommand{\heatfun}{\textcolor{themecolor3}{HeatFun}\xspace}
+
+\newcommand{\topictitle}{Solving PDEs using Spectral Methods in the Chebyshev basis \\ \large by example of the Heat Equation}
+\newcommand{\candidatenumber}{12345}
+\newcommand{\course}{Approximation of Functions}
+
+\title{\topictitle}
+\author{Candidate \candidatenumber}
+\date{\today}
 
 % Outline:
 % ✅ Setting: define heat equation PDE problem (with BCs), explain series in x direction
@@ -88,7 +89,7 @@
   \end{center}
 
   \begin{abstract}
-    This work shall attempt to numerically solve the heat equation $u_t = \alpha u_{xx}$ with Dirichlet boundary conditions over the domain $[-1, 1] \times [0, T]$ by representing the spatial component as a \textit{chebfun} (Chebyshev series) and moving on in time by the Forward Euler numerical scheme.
+    This work shall attempt to numerically solve the heat equation $u_t = \alpha u_{xx}$ with Dirichlet boundary conditions over the domain $[-1, 1] \times [0, T]$ by representing the spatial component as a \chebyshev series (\textit{chebfun}) and moving on in time by the Forward Euler numerical scheme.
     \vspace*{0.2cm}
 
     \noindent
@@ -109,7 +110,7 @@
   \begin{figure}[H]
     \centering
     \includegraphics[width=\linewidth]{figures/screenshot.png}
-    \caption{Screenshot of the graphical user interface. After entering an initial expression $u_0(x)$, depicted in grey, the simulation will run upon pressing 'Start'. The solution at time $t$, depicted in blue, is represented as a Chebyshev series of degree 29.}
+    \caption{Screenshot of the graphical user interface. After entering an initial expression $u_0(x)$, depicted in grey, the simulation will run upon pressing 'Start'. The solution at time $t$, depicted in blue, is represented as a \chebyshev series of degree 29.}
   \end{figure}
 
   \pagebreak
@@ -119,24 +120,24 @@
   % \pagebreak
 
   \section{Motivation}
-  Partial differential equations are notoriously hard to solve. One more possible approach to make way in this important class of problems is by the technique of spectral methods, incidentally closely related to finite element methods.
+  Partial differential equations are notoriously hard to solve. One more possible approach to make way in this important class of problems is by the technique of spectral methods, an approach closely related to finite element methods.
   The key idea is to perform the problem solution by representation of the occurring functions in a certain basis.
-  For non-periodic problem settings, \textsc{Chebyshev} series are a fantastic choice.
+  For non-periodic problem settings, \chebyshev series are a fantastic choice.
 
   % \subsection{The Heat Equation and Our Method}
   Classical approaches to solving the heat equation are:
   \begin{itemize}
-    \item Using the separation Ansatz
+    \item Using the separation ansatz
           $$u(x, t) = \underline{X}(x) \underline{T}(t), \quad \underline{X}: [-1, 1] \mapsto \R, \quad \underline{T}: [0, T] \mapsto \R$$
           one obtains a first- and second-order constant-coefficient ordinary differential equation in $t$ and $x$, respectively. Of course, this is only applicable to suitable initial conditions.
 
-    \item By Fourier-analysis: Similar to our approach below, or maybe even simpler: differentiation simply multiplies the Fourier coefficients by $\i k$, with $k$ the wave number. This is a spectral method!
+    \item By Fourier-analysis: Highly similar to our approach below, but with representation in a different basis, and potentially even simpler: differentiation simply multiplies the Fourier coefficients by $\i k$, with $k$ the wave number. This is a spectral method!
 
     \item Numerically, a finite difference scheme such as
-          $$\frac{U_{j}^{(n+1)} - U_{j}^{(n)}}{\Delta t} = \alpha \frac{U_{j+1}^{(n)} - 2 U_{j}^{(n)} + U_{j-1}^{(n)}}{(\Delta x)^2}$$ can be used to solve the problem.
+          $$\frac{U_{j}^{(n+1)} - U_{j}^{(n)}}{\Delta t} = \alpha \frac{U_{j+1}^{(n)} - 2 U_{j}^{(n)} + U_{j-1}^{(n)}}{(\Delta x)^2}, \quad U_j^{(0)} = u_0(x_j)$$ can be used to solve the problem.
   \end{itemize}
 
-  Our method focusses on a combination of a spectral method (for the spatial component) and finite difference approximation (for the temporal component).
+  Our method focusses on the combination of a spectral method (for the spatial component) and a finite difference approximation (for the temporal component).
 
   The first step is to interpolate through the initial data $\{(x_j, u_0(x_j)) \;|\; x_j \in X_N\}$, iteratively modify the resulting coefficients according to the partial differential equation and finally obtain a series representation of the solution after time $T$.
 
@@ -145,7 +146,7 @@
   Let $\N$ denote the nonnegative integers, so $0 \in \N$.
 
   \begin{definition}{Chebyshev polynomial}{chebpoly}
-    Chebyshev\footnote{named after Pafnuty Lvovich \textsc{Chebyshev}, alternatively transliterated as Tchebycheff, Tchebyshev (French) or \textsc{Tschebyschow} (German)} polynomials $T_k: \R \mapsto \R$ are functions satisfying
+    \chebyshev\footnote{named after Pafnuty Lvovich \chebyshev, alternatively transliterated as Tchebycheff, Tchebyshev (French) or \textsc{Tschebyschow} (German)} polynomials $T_k: \R \mapsto \R$ are functions satisfying
     \begin{align*}
       T_k(x) = T_k(\cos \theta) := \cos(k \theta) = \frac{1}{2} (z^k + z^{-k}) \\
       z := \e^{i \theta},\quad x := \Re(z) = \cos(\theta) = \frac{1}{2}(z + z^{-1})
@@ -153,12 +154,12 @@
     for degree $k \in \N$. Then, $T_0(x) = 1$, $T_1(x) = x$, $T_2(x) = 2x^2-1$, and so on.
   \end{definition}
 
-  The above relations between $x$, $z$ and $\theta$ reveal fundamental connections between three famous basis sets: \textsc{Chebyshev}, \textsc{Laurent} and \textsc{Fourier} \parencite{atap}.
+  The above relations between $x$, $z$ and $\theta$ reveal fundamental connections between three famous basis sets: \chebyshev, \textsc{Laurent} and \textsc{Fourier} \parencite{atap}.
 
-  There is a handy method of explicitly writing out the Chebyshev polynomials in $x$, namely by a three-step recursion with $T_0(x) = \cos(0) = 1$ and $T_1(x) = \cos(\theta) = x$.
+  There is a handy method of explicitly writing out the \chebyshev polynomials in $x$, namely by a three-step recursion with $T_0(x) = \cos(0) = 1$ and $T_1(x) = \cos(\theta) = x$.
 
   \begin{theorem}{Chebyshev recursion formula}{chebrecursion}
-    The Chebyshev polyomials satisfy the three-term recurrence relation $$T_{k+1}(x) = 2x T_k(x) - T_{k-1}(x) \,.$$
+    The \chebyshev polyomials satisfy the three-term recurrence relation $$T_{k+1}(x) = 2x T_k(x) - T_{k-1}(x) \,.$$
   \end{theorem}
   \begin{proof}
     For $k > 1$, we have
@@ -171,7 +172,7 @@
   \end{proof}
 
   \subsection{An Orthogonal Basis}
-  The Chebyshev polynomials also satisfy an \emph{orthogonality relation},
+  The \chebyshev polynomials also satisfy an \emph{orthogonality relation},
   $$\langle T_m, T_n \rangle := \int_{-1}^1 T_m(x) T_n(x) \frac{1}{\sqrt{1-x^2}} \ddx = \int_{\pi}^{0} \cos(m \theta) \cos(n \theta) \frac{-\sin(\theta)}{\sqrt{1-\cos^2(\theta)}} \dd\theta \,,$$
   which becomes, with the fitting substitution $x = \cos(\theta)$ and $\ddx = -\sin(\theta) \dd\theta$,
   \begin{align*}
@@ -184,14 +185,14 @@
       \pi/2 & \text{ for } m = n \neq 0 \\
       \pi   & \text{ for } m = n = 0
     \end{cases}$$
-  which can be effectively utilised to define a function space $(\mathbb{T}, +, \cdot)$ in the \emph{orthogonal} basis of Chebyshev polynomials $\mathcal{T} := \{T_k\}_{k \in \N}$.
+  which can be effectively utilised to define a function space $(\mathbb{T}, +, \cdot)$ in the \emph{orthogonal} basis of \chebyshev polynomials $\mathcal{T} := \{T_k\}_{k \in \N}$.
   Note that the operation $\langle \cdot, \cdot \rangle$ satisfies all axioms of an authentic inner product (linearity, etc.) over a function space due to the linearity of the integral.
 
   In the following proceedings, we will restrict our view on functions over the interval $[-1, 1] \subset \R$.
-  Any (real) Lipschitz-continuous function $f \in \mathcal{C}_L$, where $\cC_L := \{g: [-1, 1] \mapsto \R \;|\; \exists L \text{ s.t. } \forall x_1, x_2 \in \R, \; |g(x_1) - g(x_2)| \le L \cdot |x_1-x_2|\}$ can be represented in the Chebyshev basis $\cT$, as Lipschitz continuity is a sufficient condition for absolute and uniform convergence of the corresponding series representation
+  Any (real) Lipschitz-continuous function $f \in \mathcal{C}_L$, where $\cC_L := \{g: [-1, 1] \mapsto \R \;|\; \exists L \text{ s.t. } \forall x_1, x_2 \in \R, \; |g(x_1) - g(x_2)| \le L \cdot |x_1-x_2|\}$ can be represented in the \chebyshev basis $\cT$, as Lipschitz continuity is a sufficient condition for absolute and uniform convergence of the corresponding series representation
   $$f(x) = \sum_{k=0}^\infty a_k T_k(x), \quad a_k \in \R,\quad k \in \N \,.$$
 
-  Utilising orthogonality, for any $f \in \cC_L$, we find coefficients $a_l \in \R$ by 'right-multiplying' the equation $f = \sum_{k=0}^\infty a_k T_k$ with any one of the Chebyshev polynomials $T_l$.
+  Utilising orthogonality, for any $f \in \cC_L$, we find coefficients $a_l \in \R$ by 'right-multiplying' the equation $f = \sum_{k=0}^\infty a_k T_k$ with any one of the \chebyshev polynomials $T_l$.
   \begin{align*}
     \langle f, T_l \rangle & = \langle \sum_{k=0}^\infty a_k T_k, T_l \rangle = \int_0^\pi \sum_{k=0}^\infty a_k T_k(\cos \theta) \cdot T_l(\cos \theta) \dd\theta \\
                            & = \sum_{k=0}^\infty a_k \langle T_k, T_l \rangle \quad \text{ \textcolor{gray}{by linearity of the inner product}}                    \\
@@ -202,7 +203,7 @@
   \end{align*}
   which can easily be rearranged to give explicit relations for $a_0$ and $a_k$, summarised in the below theorem.
   \begin{theorem}{Chebyshev series coefficient formula}{cheb-coefficient-integrals}
-    For any $f \in \cC_L$, one can obtain the Chebyshev series coefficients $a_k$, $k \in \N$ as
+    For any $f \in \cC_L$, one can obtain the \chebyshev series coefficients $a_k$, $k \in \N$ as
     \begin{align*}
       a_0 & = \frac{1}{\pi} \langle f, T_0 \rangle =  \frac{1}{\pi} \int_0^\pi f(\cos \theta) \dd\theta                                   \\
       a_k & = \frac{2}{\pi} \langle f, T_k \rangle = \frac{2}{\pi} \int_0^\pi f(\cos \theta) \cos(k \theta) \dd\theta, \quad k \neq 0 \,.
@@ -217,7 +218,7 @@
 
   \subsection{Numerical Computation of Coefficients}
   \label{subsection:numerical-coeffs}
-  As computers rarely allow us to store infinitely many coefficients $a_k$, we will work with the truncated Chebyshev series
+  As computers rarely allow us to store infinitely many coefficients $a_k$, we will work with the truncated \chebyshev series
   \begin{equation}
     f_N(x) = \sum_{k=0}^{N-1} a_k T_k(x), \quad k \in \{0, ..., N-1\},\quad N \in \N, N > 1
     \label{eq:truncated-cheb-series}
@@ -226,7 +227,7 @@
   $$f(x) - f_N(x) = \sum_{k=0}^{\infty} a_k T_k(x) - \sum_{k=0}^{N-1} a_k T_k(x) = \sum_{k=N}^{\infty} a_k T_k(x) \,.$$
 
   \begin{definition}{Truncated Chebyshev series function space}{truncated-chebspace}
-    Let $(\mathbb{T}_N, +, \cdot)$ denote the ring of truncated Chebyshev series up to order $N \in \N$, $N > 1$, introduced as a subspace of the polynomials of degree up to $N-1$, so $\mathbb{T}_N \subseteq \mathcal{P}_{N-1}$ with $\mathbb{T}_N := \dspan\{T_k \;|\; k = 0, ..., N-1\}$, or explicitly stated,
+    Let $(\mathbb{T}_N, +, \cdot)$ denote the ring of truncated \chebyshev series up to order $N \in \N$, $N > 1$, introduced as a subspace of the polynomials of degree up to $N-1$, so $\mathbb{T}_N \subseteq \mathcal{P}_{N-1}$ with $\mathbb{T}_N := \dspan\{T_k \;|\; k = 0, ..., N-1\}$, or explicitly stated,
     $$\mathbb{T}_N = \left\{f_N: [-1, 1] \mapsto \R,\, f_N(x) = \sum_{k=0}^{N-1} a_k T_k(x) \;\bigg|\; a_k \in \R,\, k = 0, ..., N-1\right\},$$
     inheriting (pointwise) addition and multiplication from $(\mathcal{P}_{N-1}, +, \cdot)$.
   \end{definition}
@@ -265,19 +266,19 @@
   \begin{definition}{Chebyshev points}{chebpoints}
     From the equispaced points
     $$\Theta_N := \left\{\theta_j := \frac{j\pi}{N-1} \;\bigg|\; j = 0, ..., N-1\right\} \,,$$
-    we can further define the Chebyshev points as the corresponding $\cos(\theta_j)$,
+    we can further define the \chebyshev points as the corresponding $\cos(\theta_j)$,
     $$X_N := \{x_j := \cos(\theta_j) \;|\; \theta_j \in \Theta_N\} \,.$$
   \end{definition}
 
   \begin{figure}[H]
     \centering
     \inputtikz{chebpoints}
-    \caption{The Chebyshev points $\{x_j = \cos(\theta_j)\}$ are projections of the equispaced points $\{\theta_j\}$ on the unit circle onto the x-axis.}
+    \caption{The \chebyshev points $\{x_j = \cos(\theta_j)\}$ are projections of the equispaced points $\{\theta_j\}$ on the unit circle onto the x-axis.}
     \label{fig:chebpoints}
   \end{figure}
 
   \subsection{A Numerical Issue}
-  Wanting to interpolate through $N$ points, namely through $\{(x_j, f(x_j)) \;|\; x_j \in X_N\}$, the corresponding truncated Chebyshev series will have $N$ coefficients. To approximate the coefficient integral, we use \Cref{thm:integralapprox} without the limit.
+  Wanting to interpolate through $N$ points, namely through $\{(x_j, f(x_j)) \;|\; x_j \in X_N\}$, the corresponding truncated \chebyshev series will have $N$ coefficients. To approximate the coefficient integral, we use \Cref{thm:integralapprox} without the limit.
 
   Even approximately speaking, the rectangular integral rule in application to \Cref{thm:cheb-coefficient-integrals} does, in some situations, not approach the correct coefficients.
   We now consider three different variations of the rectangular rule integral approximation, see why none of them are optimal in this situation and look at a possible resolution to this numerical issue, inspired by the DCT (cf. \Cref{def:dct}).
@@ -321,7 +322,7 @@
   \subsection{The Interpolation Algorithm}
   Implementing the rectangular integral rule, \tschebfun begins by computing $a_0$ as the sum of all $y$, normalised by $\frac{1}{N}$.
   We compute the remaining coefficients in a for-loop, directly according to \Cref{eq:coefficient-formula}.
-  The input, $\vec{y} \in \R^N$ is a vector of function values sampled at the modified Chebyshev points $\tilde{X}_N$.
+  The input, $\vec{y} \in \R^N$ is a vector of function values sampled at the modified \chebyshev points $\tilde{X}_N$.
   \begin{minted}{cpp}
     TschebFun TschebFun::interpolantThrough(Vector y) {
       int order = y.size(), degree = order - 1;
@@ -334,7 +335,7 @@
     }
   \end{minted}
 
-  Note that the above algorithm can also be expressed as the dot-product of a matrix, a Pseudo-Vandermonde matrix $V \in \R^{N\times N}$ in the Chebyshev basis, with the vector $\vec{y}$.
+  Note that the above algorithm can also be expressed as the dot-product of a matrix, a Pseudo-Vandermonde matrix $V \in \R^{N\times N}$ in the \chebyshev basis, with the vector $\vec{y}$.
 
   $$\vec{a} = V \vec{y} = \frac{1}{N} \begin{pmatrix}
       T_0(x_0)  & T_0(x_1)  & \cdots & T_0(x_N)  \\
@@ -351,7 +352,7 @@
   % TODO: maybe a small plot of a function next to its interpolant?
 
   \section{The Spectral Method}
-  Now that we have the most important tool in our belt, Chebyshev interpolation, we can proceed to solve our original problem as given on page 1.
+  Now that we have the most important tool in our belt, \chebyshev interpolation, we can proceed to solve our original problem as given on page 1.
 
   \subsection{Forward Euler}
   As mentioned earlier, we will approximate the time-derivative using the Forward Euler numerical scheme.
@@ -472,7 +473,7 @@ end
 
   \section{Analysis, Comparison and Results}
   The implementation is complete and we are ready to look at our results.
-  One more thing is missing though, given the coefficients $\vec{a}^{(T)}$ we also want to evaluate the Chebyshev series $u^{(T)} \in \mathbb{T}_N$ on some $x \subset [-1, 1]$!
+  One more thing is missing though, given the coefficients $\vec{a}^{(T)}$ we also want to evaluate the \chebyshev series $u^{(T)} \in \mathbb{T}_N$ on some $x \subset [-1, 1]$!
 
   \subsection{Evaluation: The Clenshaw Algorithm}
   For this purpose, let us recall the recurrence relation we proved in the very beginning, \Cref{thm:chebrecursion}.
@@ -485,7 +486,7 @@ end
     to finally arrive at $f(x) = a_0F_0(x)+y_1F_1(x)+\beta(1,x)F_0(x)y_2$.
   \end{theorem}
 
-  From \Cref{thm:chebrecursion} we identify $\alpha(n, x) = 2x$ and $\beta(n, x) = -1$ to arrive at the following special case for Chebyshev series:
+  From \Cref{thm:chebrecursion} we identify $\alpha(n, x) = 2x$ and $\beta(n, x) = -1$ to arrive at the following special case for \chebyshev series:
   \begin{minted}{cpp}
     Vector TschebFun::evaluateOn(Vector x) {
       Vector U_kp2;
@@ -556,7 +557,7 @@ end
   Of course, the interpolation accuracy is crucial for the accuracy of the end result.
   If even $u_0 \in \mathbb{T}_N$, then the approximation is exact and the error is only inherited from Forward Euler, as the spatial derivative is exact (up to numerical round-off).
 
-  Some initial conditions, and especially high-degree Chebyshev series (i.e. high $N$) cause numerical issues with Forward Euler.
+  Some initial conditions, and especially high-degree \chebyshev series (i.e. high $N$) cause numerical issues with Forward Euler.
   This is because the derivative of a polynomial simply gains higher and higher pre-factors for growing degrees of the monomials.
   The effect is then amplified by the boundary conditions forced onto the highest-degree coefficients, sometimes leading to fairly high coefficients that will ruin our next iterate.
   The upside is that this issue can always be remedied by reducing the time-step (ultimately, this was the reason for adding the adaptive time-step optimisation).
