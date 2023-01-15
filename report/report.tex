@@ -31,7 +31,7 @@
 \newcommand{\heatfun}{\textcolor{themecolor3}{HeatFun}\xspace}
 
 \newcommand{\topictitle}{Solving PDEs using Spectral Methods in the Chebyshev basis \\ \large by example of the Heat Equation}
-\newcommand{\candidatenumber}{12345}
+\newcommand{\candidatenumber}{1072462}
 \newcommand{\course}{Approximation of Functions}
 
 \title{\topictitle}
@@ -363,25 +363,25 @@
   The numerical accuracy of this scheme is only $\mathcal{O}(\Delta t)$.
   Approaches to improve this would be by using, for instance, linear multistep methods \parencite{süli_mayers_2003}.
 
-  So in our case, assuming the existence of a differentiation operator $\mathcal{D}_N: \mathbb{T}_N \mapsto \mathbb{T}_N$, the solution function $u^{(t)} \in \mathbb{T}_N$ at time $t$ evolves as follows:
+  So in our case, given the existence of a differentiation operator $\mathcal{D}_N: \mathbb{T}_N \mapsto \mathbb{T}_N$, the solution function $u^{(t)} \in \mathbb{T}_N$ at time $t$ evolves as follows:
   \begin{align*}
     u^{(t+\Delta t)} = u^{(t)} + \alpha \Delta t \cdot \mathcal{D}_N^2 u^{(t)} \,.
   \end{align*}
 
   \paragraph{Adaptive time-steps}
-  An optional optimisation to Forward-Euler that was implemented in \heatfun as well, is an adaptive time-step that prevents coefficient explosion by adjusting the time-step $\Delta t$ after each iteration by
+  An optional optimisation to Forward-Euler that was added to \heatfun, our spectral heat equation solver implementation based on \tschebfun, is an adaptive time-step that prevents coefficient explosion by adjusting the time-step $\Delta t$ after each iteration by
   $$(\Delta t)_{\text{next}} = \left(\frac{\delta}{\norm{\vec{a}^{(t+\Delta t)} - \vec{a}^{(t)}}_1}\right)^{\frac{1}{5}} \cdot \Delta t \,,$$
-  with 'goal' parameter $\delta \in \R$.
-  The effect of this is simple: if the change (as measured by the 1-norm $\norm{\cdot}_1$) between two iterations is larger than $\delta$, the time step will be reduced. Otherwise, increased.
+  with a 'goal change' parameter $\delta \in \R$.
+  The effect of this is simple: if the change (as measured by the 1-norm $\norm{\cdot}_1$ of the coefficients) between two iterations is larger than $\delta$, the time step will be reduced. Otherwise, increased.
   $\delta$ can be adjusted in the graphical user interface upon activation of the optimisation.
 
   \subsection{Differentiation in the Spatial Direction}
   So now, our aim is to find an explicit relation between the coefficients of the derivative of a function $u^{(t)} \in \mathbb{T}_N$ and the original coefficients.
-  As differentiation is a linear operation, which can be especially well understood from this very fact, there exists a matrix $D_N \in \R^{N-1 \times N}$ corresponding to the differentiation operation $\mathcal{D}_N$.
+  As differentiation is a linear operation, which can be especially well understood from this very fact, there exists a matrix $D_N \in \R^{(N-1) \times N}$ corresponding to the differentiation operation $\mathcal{D}_N$.
   $$\text{For any } u \in \mathbb{T}_N,\, u(x) = \sum_{k=0}^{N-1} a_k T_k(x), \quad u' = \mathcal{D}_N u \;\Leftrightarrow\; \vec{a}' = D_N \vec{a} \,.$$
 
-  The explicit form of this differentiation matrix can be found in chapter 6 of \cite{spectralmethods}.
-  Our approach shall be a bit different, the algorithmic implementation can be made more space- and time-efficient by performing an iteration over the coefficients directly.
+  Note that this differentiation matrix operates between the coefficients, not the function values as it is introduced in Chapter 6 of \cite{spectralmethods}.
+  Our implementation shall not use $D_N$ directly however, as the algorithmic implementation can be made more space- and time-efficient by performing an iteration over the coefficients directly.
 
   In \tschebfun, it is implemented as follows, as adapted from \cite{numpy}:
   \begin{minted}{cpp}
@@ -401,21 +401,21 @@
     }
   \end{minted}
 
-  The next step is to make sure that the newly obtained $u^{(t+\Delta t)}$ fulfills the boundary conditions $u^{(t)}(-1) = l$ and $u^{(t)}(1) = r$ as well!
+  The next step is to make sure that the newly obtained $u^{(t+\Delta t)} \in \mathbb{T}_N$ fulfills the boundary conditions $u^{(t)}(-1) = l$ and $u^{(t)}(1) = r$ as well!
 
   \subsection{Enforcing Boundary Conditions}
-  One way of forcing the boundary conditions, at least the first that came to mind when thinking of this issue, is to pin down the two highest-order coefficients, who are untouched by the differential equation (differentiating a polynomial twice reduces its degree by two), in the series representation after the iteration.
+  One way of forcing the boundary conditions onto $u^{(t+\Delta t)}$, is to pin down the two highest-order coefficients, who are untouched by the differential equation (differentiating a polynomial twice reduces its degree by two), in the series representation after the iteration.
 
   Let $l := u_0(-1)$, $r := u_0(1)$.
   Recognise that
   \begin{align*}
-    T_k(-1) & = T_k(\cos \pi) = \cos(k \pi) = (-1)^k \\
-    T_k(1)  & = T_k(\cos 0) = \cos(k 0) = 1
+    T_k(-1) & = T_k(\cos \pi) = \cos(k \pi) = (-1)^k\,, \\
+    T_k(1)  & = T_k(\cos 0) = \cos(k 0) = 1\,,
   \end{align*}
   which leads to
   \begin{align*}
-    u(-1, t) & = \sum_{k=0}^{N-1} a_k^{(t)} T_k(-1) & = & \overbrace{\sum_{k=0}^{N-3} a_k^{(t)} (-1)^k}^{:= \Sigma_1} & + & (-1)^{N-2} a_{N-2} & + & (-1)^{N-1} a_{N-1} & = l \\
-    u(1, t)  & = \sum_{k=0}^{N-1} a_k^{(t)} T_k(1)  & = & \underbrace{\sum_{k=0}^{N-3} a_k^{(t)}}_{:= \Sigma_2}       & + & a_{N-2}            & + & a_{N-1}            & = r
+    u(-1, t) & = \sum_{k=0}^{N-1} a_k^{(t)} T_k(-1) & = & \overbrace{\sum_{k=0}^{N-3} a_k^{(t)} (-1)^k}^{:= \Sigma_1} & + & (-1)^{N-2} a_{N-2} & + & (-1)^{N-1} a_{N-1} & = l\,, \\
+    u(1, t)  & = \sum_{k=0}^{N-1} a_k^{(t)} T_k(1)  & = & \underbrace{\sum_{k=0}^{N-3} a_k^{(t)}}_{:= \Sigma_2}       & + & a_{N-2}            & + & a_{N-1}            & = r\,,
   \end{align*}
   By adding up the above two equations, one obtains
   \begin{equation}
@@ -473,8 +473,8 @@ end
   \end{minted}
 
   \section{Analysis, Comparison and Results}
-  The implementation is complete and we are ready to look at our results.
-  One more thing is missing though, given the coefficients $\vec{a}^{(T)}$ we also want to evaluate the \chebyshev series $u^{(T)} \in \mathbb{T}_N$ on some $x \subset [-1, 1]$!
+  The implementation is complete and we are ready to evaluate our results.
+  One more aspect is missing though, given the coefficients $\vec{a}^{(T)}$ we also want to evaluate the \chebyshev series $u^{(T)} \in \mathbb{T}_N$ on some $x \in [-1, 1]$!
 
   \subsection{Evaluation: The Clenshaw Algorithm}
   For this purpose, let us recall the recurrence relation we proved in the very beginning, \Cref{thm:chebrecursion}.
@@ -503,10 +503,10 @@ end
   \end{minted}
 
   Essentially, the idea is simple: Using the recurrence relation (\Cref{thm:chebrecursion}) to our advantage and tracking the sum of $a_k T_k(x)$ on the way from $k = N-2$ to $k=0$, which is why we call it the backward Clenshaw recurrence.
-  The above implementation can work with vector-valued $\vec{x}$.
+  The above implementation can work with vector-valued $\vec{x} \in \R^M$ for any $M \in \N$.
 
   \subsection{Analysis: Interface to Python}
-  Another exciting aspect of \heatfun is its extension to a compiled Python module using \texttt{pybind11}\footnote{\url{https://pybind11.readthedocs.io/}}, which allows any user to leverage its functionality along with convenient Python \& NumPy!
+  Another exciting aspect of \heatfun is its extension to a compiled Python module using \texttt{pybind11}\footnote{\url{https://pybind11.readthedocs.io/}}, which allows any user to leverage its functionality along with convenient Python \& NumPy! The following code snippet illustrates a usage example.
 
   \begin{minted}{python}
     import heatfun, numpy as np
@@ -537,23 +537,28 @@ end
   \begin{figure}[H]
     \centering
     \inputtikz{comparison-gaussian}
-    \caption{Comparison of \heatfun and Chebfun for solving the stated heat equation problem with $\alpha = 1$, $T = 0.01$, $N = 30$ and initial condition $u_0(x) = \e^{-12 x^2}$. The squared error between the two functions, evaluated in 500 points, is \num{8.6e-08}.}
+    \caption{Comparison of \heatfun and Chebfun for solving the stated heat equation problem with $\alpha = 1$, $T = 0.01$, $N = 30$ and initial condition $u_0(x) = \e^{-12 x^2}$. The squared error between the two functions, evaluated in $M = 500$ points, is \num{8.6e-08}.}
+    \label{fig:example1}
   \end{figure}
 
   \begin{figure}[H]
     \centering
     \inputtikz{comparison-sines}
-    \caption{Comparison of \heatfun and Chebfun for solving the stated heat equation problem with $\alpha = 1$, $T = 0.01$, $N = 30$ and initial condition $u_0(x) = \sin((4x)^2) + \sin(4x)^2$. The squared error between the two functions, evaluated in 500 points, is \num{1.01e-05}.}
+    \caption{Comparison of \heatfun and Chebfun for solving the stated heat equation problem with $\alpha = 1$, $T = 0.01$, $N = 30$ and initial condition $u_0(x) = \sin((4x)^2) + \sin(4x)^2$. The squared error between the two functions, evaluated in $M = 500$ points, is \num{1.01e-05}.}
+    \label{fig:example2}
   \end{figure}
 
   \begin{figure}[H]
     \centering
     \inputtikz{comparison-tanh-kernel}
-    \caption{Comparison of \heatfun and Chebfun for solving the stated heat equation problem with $\alpha = 1$, $T = 0.01$, $N = 30$ and initial condition $u_0(x) = \tanh(-10x^4)$. The squared error between the two functions, evaluated in 500 points, is \num{1.06e-07}.}
+    \caption{Comparison of \heatfun and Chebfun for solving the stated heat equation problem with $\alpha = 1$, $T = 0.01$, $N = 30$ and initial condition $u_0(x) = \tanh(-10x^4)$. The squared error between the two functions, evaluated in $M = 500$ points, is \num{1.06e-07}.}
+    \label{fig:example3}
   \end{figure}
 
+  The three example cases \Cref{fig:example1}, \Cref{fig:example1} and \Cref{fig:example3} demonstrate the correct behaviour of the solver, closesly matching those returned by Chebfun's \texttt{pde15s()}.
+
   \section{Discussion and Outlook}
-  Generally, the solver works pretty well and efficiently in our given setting!
+  Generally, the solver works well and efficiently in our given setting!
   The interpolation procedure, although kept simple, produces coefficients that match those returned by Chebfun in MatLab up to 10 decimal places, at least for simple functions.
   Of course, the interpolation accuracy is crucial for the accuracy of the end result.
   If even $u_0 \in \mathbb{T}_N$, then the approximation is exact and the error is only inherited from Forward Euler, as the spatial derivative is exact (up to numerical round-off).
