@@ -60,15 +60,15 @@
 % ✅ - Method three: via finite differences and repeated interpolantThrough()
 % ✅ Final application: interpolantThrough(), u_1 = alpha * dt * diff(diff(u_0)), evaluateOn()
 % ✅ Results
-% TODO: chebfun supports solving using both the spectral method as well as time-stepping methods [TAD14 - ChebFun guide].
+% ✅ chebfun supports solving using both the spectral method as well as time-stepping methods [TAD14 - ChebFun guide].
 % ✅ D_N matrix is (N+1) x (N+1) or N x (N+1)??
 
 % Yuji:
-% I think you could have many more references. You've got the key ones, but you can definitely add more, e.g. when you discuss Cheb-polynomials, computing coefficients, and more general discussions on spectral methods (besides Nick's) etc.
+% ✅ I think you could have many more references. You've got the key ones, but you can definitely add more, e.g. when you discuss Cheb-polynomials, computing coefficients, and more general discussions on spectral methods (besides Nick's) etc.
 % ✅ I'm not sure eprint information is needed.
 % ✅ Sigma missing in 1st line of last displayed equation on p.4.
 % ✅ When referring to theorems, 'Theorem 2.2' not 'theorem 2.2'. Same for Definition XX, Figure YY etc.
-% 2.4 Definition, y not defined (or rather what DCT does isn't told)
+% ✅ 2.4 Definition, y not defined (or rather what DCT does isn't told)
 % ✅ I'm not sure what 'absolute-value norm' is.
 % I'm not sure what you're doing in Sec 3.2 is clear enough.
 % ✅ Forward Euler is a natural first thing to try, but I'd mention its convergence is slow.
@@ -145,6 +145,7 @@
   \pagebreak
   \section{Chebyshev Interpolation}
   Let $\N$ denote the nonnegative integers, so $0 \in \N$.
+  From \cite{atap}:
 
   \begin{definition}{Chebyshev polynomial}{chebpoly}
     \chebyshev\footnote{Named after Pafnuty Lvovich \chebyshev, alternatively transliterated as Tchebycheff, Tchebyshev (French) or \textsc{Tschebyschow} (German).} polynomials $T_k: \R \mapsto \R$ are functions satisfying
@@ -265,7 +266,7 @@
   A much more fundamental numerical insight relating to the choice of points is the \emph{Runge phenomenon} \parencite{runge-phenomenon}.
 
   \begin{definition}{Chebyshev points}{chebpoints}
-    From the equispaced points
+    Slightly adapted from \cite{atap}. From the equispaced points
     $$\Theta_N := \left\{\theta_j := \frac{j\pi}{N-1} \;\bigg|\; j = 0, ..., N-1\right\} \,,$$
     we can further define the \chebyshev points as the corresponding $\cos(\theta_j)$,
     $$X_N := \{x_j := \cos(\theta_j) \;|\; \theta_j \in \Theta_N\} \,.$$
@@ -337,7 +338,7 @@
     }
   \end{minted}
 
-  Note that the above algorithm can also be expressed as the dot-product of a matrix, a Pseudo-Vandermonde matrix $V \in \R^{N\times N}$ in the \chebyshev basis, with the vector $\vec{y}$,
+  Note that the above algorithm can also be expressed as the dot-product of a matrix, a Pseudo-Vandermonde matrix $V \in \R^{N\times N}$ in the \chebyshev basis, with the vector $\vec{y}$ of function values evaluated at the Chebyshev points \parencite{numpy},
   $$\vec{a} = V \vec{y} = \frac{1}{N} \begin{pmatrix}
       T_0(x_0)  & T_0(x_1)  & \cdots & T_0(x_N)  \\
       2T_1(x_0) & 2T_1(x_1) & \cdots & 2T_1(x_N) \\
@@ -361,7 +362,7 @@
   $$\frac{\partial u^{(t)}}{\partial t} \approx \frac{u^{(t+\Delta t)} - u^{(t)}}{\Delta t} \quad\Leftrightarrow\quad u^{(t+\Delta t)} \approx u^{(t)} + \Delta t \frac{\partial u^{(t)}}{\partial t} = u^{(t)} + \alpha \Delta t \frac{\partial^2 u^{(t)}}{\partial x^2} \,,$$
   which provides us with an explicit relation for the next time-level $u^{(t+\Delta t)}$ given the previous one.
   The numerical accuracy of this scheme is only $\mathcal{O}(\Delta t)$.
-  Approaches to improve this would be by using, for instance, linear multistep methods \parencite{süli_mayers_2003}.
+  One approach to improve this would be by using linear multistep methods \parencite{süli_mayers_2003}.
 
   So in our case, given the existence of a differentiation operator $\mathcal{D}_N: \mathbb{T}_N \mapsto \mathbb{T}_N$, the solution function $u^{(t)} \in \mathbb{T}_N$ at time $t$ evolves as follows:
   \begin{align*}
@@ -487,7 +488,7 @@ end
     to finally arrive at $f(x) = a_0F_0(x)+y_1F_1(x)+\beta(1,x)F_0(x)y_2$.
   \end{theorem}
 
-  From \Cref{thm:chebrecursion} we identify $\alpha(n, x) = 2x$ and $\beta(n, x) = -1$ to arrive at the following special case for \chebyshev series:
+  From \Cref{thm:chebrecursion} we identify $\alpha(n, x) = 2x$ and $\beta(n, x) = -1$ to arrive at the following special case for \chebyshev series \parencite{Broucke1973TenSF}:
   \begin{minted}{cpp}
     Vector TschebFun::evaluateOn(Vector x) {
       Vector U_kp2;
@@ -556,8 +557,9 @@ end
   \end{figure}
 
   The three example cases \Cref{fig:example1}, \Cref{fig:example2} and \Cref{fig:example3} demonstrate the correct behaviour of the solver, closesly matching those returned by Chebfun's \texttt{pde15s()}. The mentioned \textit{squared error} refers to the squared (Euclidean) 2-norm of the difference between the two outcomes evaluated in $M = 500$ points.
+  In order to allow for a fair comparison, the evaluations above used a constant time-step (the adaptivity optimisiation is turned off).
 
-  As \heatfun only supports time-stepping methods, a direct runtime comparison to Chebfun's computation time would not be sensible as \heatfun's runtime linearly depends on the final time $T$.
+  As \heatfun only supports time-stepping methods, a direct runtime comparison to Chebfun's computation time would not be sensible as \heatfun's runtime linearly depends on the final time $T$, while Chebfun's does not \parencite{chebfun-guide}.
   One of many possible extensions to this Special Topic could be to perform a systematic analysis of only the interpolation procedure, considering both runtime and accuracy.
 
   \pagebreak
