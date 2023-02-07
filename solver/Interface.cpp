@@ -139,7 +139,10 @@ void HeatDemonstrator::buildUI() {
       controlBtn->setText("Start");
     }
   });
-  connect(reinitBtn, &QPushButton::clicked, [=, this]() { setupExpression(getExpression()); });
+  connect(reinitBtn, &QPushButton::clicked, [=, this]() {
+    totalTime = 0;
+    setupExpression(getExpression());
+  });
   connect(rescaleBtn, &QPushButton::clicked, [=, this]() { plotCurrentU(true); });
   connect(exportBtn, &QPushButton::clicked, [=, this]() {
     std::ofstream out_file("/tmp/heat-state.csv");

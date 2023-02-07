@@ -1,6 +1,14 @@
 #include "Solver.h"
 #include <xtensor/xadapt.hpp>
 
+#define min(a, b) ((a < b) ? a : b)
+#define max(a, b) ((a > b) ? a : b)
+static const double kappa_0 = 35;
+static const double alph = 0.5;
+static const double E_start = -0.01;
+static const double E_0 = -0.01;
+static const double t_rev = 0.01;
+
 HeatSolver::HeatSolver() {}
 
 void HeatSolver::setup(Vector u0) {
@@ -18,6 +26,11 @@ void HeatSolver::setup(Vector u0) {
 }
 
 void HeatSolver::iterate() {
+  double a = max(0, min(1, currentU.evaluateOn({-1})[0])), b = 1 - a;
+  double E = (totalTime <= t_rev) ? (E_start + totalTime) : E_start + t_rev - (totalTime - t_rev);
+  left_bc.value = kappa_0 * (a * exp(200 * (1 - alph) * (E - E_0)) - b * exp(-200 * alph * (E - E_0)));
+  std::cout << "Set left BC: type " << left_bc.type << " value: " << left_bc.value << std::endl;
+
   // base step, leaves two degrees of freedom a_{N}, a_{N-1}
   TschebFun previousU = currentU;
   currentU = previousU + previousU.derivative().derivative() * (dt * alpha);
@@ -67,7 +80,8 @@ void HeatSolver::forceBoundaryConditions() {
       currentU.coefficients[degree - 1] = right_bc.value - sigma_2 - currentU.coefficients[degree];
       std::cout << "Set highest-order coefficients to: a_{N-2} = " << currentU.coefficients[degree - 1]
                 << " and a_{N-1} = " << currentU.coefficients[degree] << std::endl;
-      std::cout << "Derivative at x=-1: " << currentU.derivative().evaluateOn({-1})[0] << std::endl;
+      std::cout << "Derivative at x=-1: " << currentU.derivative().evaluateOn({-1})[0]
+                << ", should be: " << left_bc.value << std::endl;
       break;
     }
   }
