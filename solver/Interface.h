@@ -36,6 +36,7 @@ class HeatDemonstrator : public HeatSolver, public QMainWindow {
   QPushButton *stepBtn = new QPushButton("Step");
   QPushButton *differentiationBtn = new QPushButton("Differentiate");
   QPushButton *reinitBtn = new QPushButton("Reset");
+  QPushButton *rescaleBtn = new QPushButton("Rescale");
   QPushButton *exportBtn = new QPushButton("Export");
   QCheckBox *showChebpoints = new QCheckBox("Show chebpoints");
   QCheckBox *adaptiveDtCheckBox = new QCheckBox("Adaptive time-step");
@@ -49,7 +50,7 @@ class HeatDemonstrator : public HeatSolver, public QMainWindow {
   void timerEvent(QTimerEvent *event) { step(); };
 
   void plotChebpoints();
-  void plotCurrentU();
+  void plotCurrentU(bool adaptYAxis = false);
   void plotXYSeries(QXYSeries *series, Vector X, Vector Y, bool adaptYAxis = false);
 
   // very important:

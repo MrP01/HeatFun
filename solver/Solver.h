@@ -9,16 +9,24 @@ struct Optimisations {
   bool linearMultistep = false;
 };
 
+enum BoundaryConditionType { Dirichlet, Neumann };
+struct BoundaryCondition {
+  enum BoundaryConditionType type = Dirichlet;
+  double value = 0;
+};
+
 class HeatSolver {
  public:
   double alpha = 1.0;
   double dt = 1e-5;
-  double left_bc = 0;
-  double right_bc = 0;
+  struct BoundaryCondition left_bc;
+  struct BoundaryCondition right_bc;
   double totalTime = 0;
   TschebFun currentU = TschebFun(1);
 
   struct Optimisations optimisations;
+  double tau_1 = 0;
+  double tau_2 = 0;
 
  public:
   HeatSolver();

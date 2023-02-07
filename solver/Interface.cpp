@@ -36,10 +36,10 @@ void HeatDemonstrator::step() {
   statsLabel->setText(QString("Current time: t = %1\nTime-step dt = %2").arg(totalTime).arg(dt));
 }
 
-void HeatDemonstrator::plotCurrentU() {
+void HeatDemonstrator::plotCurrentU(bool adaptYAxis) {
   Vector X = xt::linspace(-1.0, 1.0, N_LINSPACE_POINTS_TO_PLOT);
   Vector Y = currentU.evaluateOn(X);
-  plotXYSeries(temperatureSeries, X, Y);
+  plotXYSeries(temperatureSeries, X, Y, adaptYAxis);
 }
 
 void HeatDemonstrator::plotChebpoints() {
@@ -59,6 +59,7 @@ void HeatDemonstrator::plotXYSeries(QXYSeries *series, Vector X, Vector Y, bool 
 std::string HeatDemonstrator::getExpression() {
   std::string expr = expressionLineEdit->text().toStdString();
   return expr.size() > 0 ? expr : "sin((4*x)^2) + sin(4*x)^2";
+  // return expr.size() > 0 ? expr : "1";
 }
 
 void HeatDemonstrator::buildUI() {
@@ -139,6 +140,7 @@ void HeatDemonstrator::buildUI() {
     }
   });
   connect(reinitBtn, &QPushButton::clicked, [=, this]() { setupExpression(getExpression()); });
+  connect(rescaleBtn, &QPushButton::clicked, [=, this]() { plotCurrentU(true); });
   connect(exportBtn, &QPushButton::clicked, [=, this]() {
     std::ofstream out_file("/tmp/heat-state.csv");
     xt::dump_csv(out_file, xt::atleast_2d(currentU.evaluateOn(xt::linspace(-1.0, 1.0, N_LINSPACE_POINTS_TO_PLOT))));
@@ -168,6 +170,7 @@ void HeatDemonstrator::buildUI() {
   sideLayout->addWidget(stepBtn);
   sideLayout->addWidget(differentiationBtn);
   sideLayout->addWidget(reinitBtn);
+  sideLayout->addWidget(rescaleBtn);
   sideLayout->addWidget(exportBtn);
   sideLayout->addWidget(createThemeChooser());
   sideLayout->addSpacing(5);
