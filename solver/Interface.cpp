@@ -2,8 +2,6 @@
 
 // TODO: potentially implement drag-and-drop functionality of u0 with the mouse
 
-#define N_LINSPACE_POINTS_TO_PLOT 500
-#define SIDE_PANEL_MAX_WIDTH 250
 static QChart::ChartTheme THEMES[5] = {QChart::ChartThemeLight, QChart::ChartThemeDark, QChart::ChartThemeBlueCerulean,
     QChart::ChartThemeBrownSand, QChart::ChartThemeBlueIcy};
 

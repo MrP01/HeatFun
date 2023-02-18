@@ -19,10 +19,12 @@
 #include <fstream>
 #include <xtensor/xcsv.hpp>
 
-#define STEPS_PER_FRAME 12 // number of timesteps per frame, TODO
+#define STEPS_PER_FRAME 20 // number of timesteps per frame, TODO
+#define N_LINSPACE_POINTS_TO_PLOT 500
+#define SIDE_PANEL_MAX_WIDTH 250
 
 class HeatDemonstrator : public HeatSolver, public QMainWindow {
- private:
+ protected:
   QChart *temperatureChart = new QChart();
   QLineSeries *u0Series = new QLineSeries();
   QLineSeries *temperatureSeries = new QLineSeries();
@@ -46,12 +48,12 @@ class HeatDemonstrator : public HeatSolver, public QMainWindow {
   size_t _step = 0;
   size_t _start_step = 0;
   size_t _timerId;
-  void step();
-  void timerEvent(QTimerEvent *event) { step(); };
+  virtual void step();
+  virtual void timerEvent(QTimerEvent *event) { step(); };
 
-  void plotChebpoints();
-  void plotCurrentU(bool adaptYAxis = false);
-  void plotXYSeries(QXYSeries *series, Vector X, Vector Y, bool adaptYAxis = false);
+  virtual void plotChebpoints();
+  virtual void plotCurrentU(bool adaptYAxis = false);
+  virtual void plotXYSeries(QXYSeries *series, Vector X, Vector Y, bool adaptYAxis = false);
 
   // very important:
   QComboBox *createThemeChooser();
@@ -59,8 +61,8 @@ class HeatDemonstrator : public HeatSolver, public QMainWindow {
 
  public:
   HeatDemonstrator() = default;
-  void buildUI();
-  void setupExpression(std::string expression);
-  void plotAndLoadU0Expression(std::string expression);
-  std::string getExpression();
+  virtual void buildUI();
+  virtual void setupExpression(std::string expression);
+  virtual void plotAndLoadU0Expression(std::string expression);
+  virtual std::string getExpression();
 };

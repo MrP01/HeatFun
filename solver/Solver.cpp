@@ -7,7 +7,7 @@ static const double kappa_0 = 35;
 static const double alph = 0.5;
 static const double E_start = -0.01;
 static const double E_0 = -0.01;
-static const double t_rev = 0.01;
+static const double t_rev = 0.02;
 
 HeatSolver::HeatSolver() {}
 

@@ -74,3 +74,9 @@ TschebFun TschebFun::operator-(const TschebFun &other) {
   return TschebFun(new_coeffs);
 }
 TschebFun TschebFun::operator*(const double &factor) { return TschebFun(coefficients * factor); }
+
+Vector TschebFun::evaluateOnInterval(Vector x, double left, double right) {
+  double beta_1 = 2 / (right - left);
+  double beta_2 = left - 1;
+  return TschebFun::evaluateOn(beta_1 * x + beta_2);
+}

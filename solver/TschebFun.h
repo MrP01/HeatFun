@@ -26,4 +26,6 @@ class TschebFun {
   TschebFun operator+(const TschebFun &other);
   TschebFun operator-(const TschebFun &other);
   TschebFun operator*(const double &factor);
+
+  Vector evaluateOnInterval(Vector x, double left, double right);
 };
