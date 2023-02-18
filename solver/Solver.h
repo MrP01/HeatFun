@@ -30,9 +30,9 @@ class HeatSolver {
 
  public:
   HeatSolver();
-  void setup(Vector u0);
-  void iterate();
-  void forceBoundaryConditions();
+  virtual void setup(Vector u0);
+  virtual void iterate();
+  virtual void forceBoundaryConditions();
 };
 
 Vector evaluateExpression(std::string expression, Vector x);
