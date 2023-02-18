@@ -1,14 +1,6 @@
 #include "Solver.h"
 #include <xtensor/xadapt.hpp>
 
-#define min(a, b) ((a < b) ? a : b)
-#define max(a, b) ((a > b) ? a : b)
-static const double kappa_0 = 35;
-static const double alph = 0.5;
-static const double E_start = -0.01;
-static const double E_0 = -0.01;
-static const double t_rev = 0.02;
-
 HeatSolver::HeatSolver() {}
 
 void HeatSolver::setup(Vector u0) {
@@ -18,19 +10,13 @@ void HeatSolver::setup(Vector u0) {
   tau_2 = (2 + (N - 1) * (N - 3)) * ((N % 2 == 0) ? 1.0 : -1.0);
 
   Vector boundary_values = currentU.evaluateOn({-1.0, 1.0});
-  left_bc.type = Neumann;
-  left_bc.value = 0;
+  left_bc.type = Dirichlet;
+  left_bc.value = boundary_values[0];
+  right_bc.type = Dirichlet;
   right_bc.value = boundary_values[1];
-  std::cout << "Set left BC: type " << left_bc.type << " value: " << left_bc.value << std::endl;
-  std::cout << "Set right BC: type " << right_bc.type << " value: " << right_bc.value << std::endl;
 }
 
 void HeatSolver::iterate() {
-  double a = max(0, min(1, currentU.evaluateOn({-1})[0])), b = 1 - a;
-  double E = (totalTime <= t_rev) ? (E_start + totalTime) : E_start + t_rev - (totalTime - t_rev);
-  left_bc.value = kappa_0 * (a * exp(200 * (1 - alph) * (E - E_0)) - b * exp(-200 * alph * (E - E_0)));
-  std::cout << "Set left BC: type " << left_bc.type << " value: " << left_bc.value << std::endl;
-
   // base step, leaves two degrees of freedom a_{N}, a_{N-1}
   TschebFun previousU = currentU;
   currentU = previousU + previousU.derivative().derivative() * (dt * alpha);
