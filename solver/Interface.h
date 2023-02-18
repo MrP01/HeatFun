@@ -25,7 +25,9 @@
 
 class HeatDemonstrator : public QMainWindow {
  protected:
-  HeatSolver *solver = nullptr;
+  HeatSolver *_solver = nullptr;
+  virtual HeatSolver *solver() { return _solver; }
+
   QChart *temperatureChart = new QChart();
   QLineSeries *u0Series = new QLineSeries();
   QLineSeries *temperatureSeries = new QLineSeries();
@@ -61,7 +63,7 @@ class HeatDemonstrator : public QMainWindow {
   void setTheme(QChart::ChartTheme theme);
 
  public:
-  HeatDemonstrator() { solver = new HeatSolver(); };
+  HeatDemonstrator() { _solver = new HeatSolver(); };
   virtual void buildUI();
   virtual void setupExpression(std::string expression);
   virtual void plotAndLoadU0Expression(std::string expression);
