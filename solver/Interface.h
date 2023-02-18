@@ -23,8 +23,9 @@
 #define N_LINSPACE_POINTS_TO_PLOT 500
 #define SIDE_PANEL_MAX_WIDTH 250
 
-class HeatDemonstrator : public HeatSolver, public QMainWindow {
+class HeatDemonstrator : public QMainWindow {
  protected:
+  HeatSolver solver;
   QChart *temperatureChart = new QChart();
   QLineSeries *u0Series = new QLineSeries();
   QLineSeries *temperatureSeries = new QLineSeries();
