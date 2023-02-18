@@ -8,7 +8,7 @@ static QChart::ChartTheme THEMES[5] = {QChart::ChartThemeLight, QChart::ChartThe
 void HeatDemonstrator::setupExpression(std::string expression) {
   plotAndLoadU0Expression(expression);
   try {
-    solver.setup(evaluateExpression(expression, TschebFun::modifiedChebpoints(orderEdit->value())));
+    solver->setup(evaluateExpression(expression, TschebFun::modifiedChebpoints(orderEdit->value())));
     plotCurrentU();
     if (showChebpoints->isChecked())
       plotChebpoints();
@@ -29,20 +29,20 @@ void HeatDemonstrator::plotAndLoadU0Expression(std::string expression) {
 
 void HeatDemonstrator::step() {
   for (size_t i = 0; i < STEPS_PER_FRAME; i++)
-    solver.iterate();
+    solver->iterate();
   plotCurrentU();
-  statsLabel->setText(QString("Current time: t = %1\nTime-step dt = %2").arg(solver.totalTime).arg(solver.dt));
+  statsLabel->setText(QString("Current time: t = %1\nTime-step dt = %2").arg(solver->totalTime).arg(solver->dt));
 }
 
 void HeatDemonstrator::plotCurrentU(bool adaptYAxis) {
   Vector X = xt::linspace(-1.0, 1.0, N_LINSPACE_POINTS_TO_PLOT);
-  Vector Y = solver.currentU.evaluateOn(X);
+  Vector Y = solver->currentU.evaluateOn(X);
   plotXYSeries(temperatureSeries, X, Y, adaptYAxis);
 }
 
 void HeatDemonstrator::plotChebpoints() {
-  Vector X = TschebFun::modifiedChebpoints(solver.currentU.order());
-  Vector Y = solver.currentU.evaluateOn(X);
+  Vector X = TschebFun::modifiedChebpoints(solver->currentU.order());
+  Vector Y = solver->currentU.evaluateOn(X);
   plotXYSeries(chebpointSeries, X, Y);
 }
 
@@ -99,31 +99,31 @@ void HeatDemonstrator::buildUI() {
   QLabel *dtLabel = new QLabel("&Time-step dt:", this);
   dtLabel->setBuddy(dtEdit);
   dtEdit->setPlaceholderText("dt");
-  dtEdit->setText(QString::number(solver.dt, 'e'));
+  dtEdit->setText(QString::number(solver->dt, 'e'));
   dtEdit->setMaximumWidth(SIDE_PANEL_MAX_WIDTH);
   connect(dtEdit, &QLineEdit::returnPressed, [=, this]() {
-    solver.dt = dtEdit->text().toDouble();
-    std::cout << "Set dt = " << solver.dt << std::endl;
+    solver->dt = dtEdit->text().toDouble();
+    std::cout << "Set dt = " << solver->dt << std::endl;
   });
 
   QLabel *goalDuLabel = new QLabel("&Adaptive goal du:", this);
   goalDuLabel->setBuddy(goalDuEdit);
   goalDuEdit->setPlaceholderText("du");
-  goalDuEdit->setText(QString::number(solver.optimisations.adaptiveGoalDu, 'e'));
+  goalDuEdit->setText(QString::number(solver->optimisations.adaptiveGoalDu, 'e'));
   goalDuEdit->setMaximumWidth(SIDE_PANEL_MAX_WIDTH);
   connect(dtEdit, &QLineEdit::returnPressed, [=, this]() {
-    solver.optimisations.adaptiveGoalDu = goalDuEdit->text().toDouble();
-    std::cout << "Set goalDu = " << solver.optimisations.adaptiveGoalDu << std::endl;
+    solver->optimisations.adaptiveGoalDu = goalDuEdit->text().toDouble();
+    std::cout << "Set goalDu = " << solver->optimisations.adaptiveGoalDu << std::endl;
   });
   goalDuEdit->setDisabled(true);
 
   connect(adaptiveDtCheckBox, &QCheckBox::stateChanged, [=, this]() {
-    solver.optimisations.adaptiveDt = adaptiveDtCheckBox->isChecked();
-    goalDuEdit->setEnabled(solver.optimisations.adaptiveDt);
+    solver->optimisations.adaptiveDt = adaptiveDtCheckBox->isChecked();
+    goalDuEdit->setEnabled(solver->optimisations.adaptiveDt);
   });
 
   connect(differentiationBtn, &QPushButton::clicked, [=, this]() {
-    solver.currentU = solver.currentU.derivative();
+    solver->currentU = solver->currentU.derivative();
     plotCurrentU();
   });
   connect(stepBtn, &QPushButton::clicked, [=, this]() { step(); });
@@ -138,14 +138,14 @@ void HeatDemonstrator::buildUI() {
     }
   });
   connect(reinitBtn, &QPushButton::clicked, [=, this]() {
-    solver.totalTime = 0;
+    solver->totalTime = 0;
     setupExpression(getExpression());
   });
   connect(rescaleBtn, &QPushButton::clicked, [=, this]() { plotCurrentU(true); });
   connect(exportBtn, &QPushButton::clicked, [=, this]() {
     std::ofstream out_file("/tmp/heat-state.csv");
     Vector X = xt::linspace(-1.0, 1.0, N_LINSPACE_POINTS_TO_PLOT);
-    xt::dump_csv(out_file, xt::atleast_2d(solver.currentU.evaluateOn(X)));
+    xt::dump_csv(out_file, xt::atleast_2d(solver->currentU.evaluateOn(X)));
     std::cout << "Exported u(x) in its current state to /tmp/heat-state.csv" << std::endl;
   });
 
