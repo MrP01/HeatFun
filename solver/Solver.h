@@ -14,6 +14,7 @@ struct BoundaryCondition {
   enum BoundaryConditionType type = Dirichlet;
   double value = 0;
 };
+typedef struct BoundaryCondition BC;
 
 class HeatSolver {
  public:
@@ -32,7 +33,7 @@ class HeatSolver {
   HeatSolver();
   virtual void setup(Vector u0);
   virtual void iterate();
-  virtual void forceBoundaryConditions();
+  virtual void forceBoundaryConditions(TschebFun *series, BC left, BC right);
 };
 
 Vector evaluateExpression(std::string expression, Vector x);
