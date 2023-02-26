@@ -129,7 +129,7 @@ void HeatDemonstrator::buildUI() {
   connect(stepBtn, &QPushButton::clicked, [=, this]() { step(); });
   connect(controlBtn, &QPushButton::clicked, [=, this]() {
     if (controlBtn->text() == "Start") {
-      _timerId = startTimer(50);
+      _timerId = startTimer(20);
       _start_step = _step;
       controlBtn->setText("Stop");
     } else {
