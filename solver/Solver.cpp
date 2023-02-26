@@ -6,8 +6,8 @@ HeatSolver::HeatSolver() {}
 void HeatSolver::setup(Vector u0) {
   currentU = TschebFun::interpolantThrough(u0);
   size_t N = currentU.order();
-  tau_1 = (2 + (N - 2) * (N - 4)) * ((N % 2 == 1) ? 1.0 : -1.0);
-  tau_2 = (2 + (N - 1) * (N - 3)) * ((N % 2 == 0) ? 1.0 : -1.0);
+  tau_1 = pow(-1.0, N) * ((N - 2) * (N - 2) + (N - 1) * (N - 1));
+  tau_2 = pow(-1.0, N) * (N - 2) * (N - 2);
 
   Vector boundary_values = currentU.evaluateOn({-1.0, 1.0});
   left_bc.type = Dirichlet;
@@ -44,7 +44,7 @@ void HeatSolver::forceBoundaryConditions(TschebFun *series, BC left, BC right) {
   double sigma_2 = xt::sum(fixed_coefficients)();
   switch (left.type) {
     case Dirichlet: {
-      double sigma_1 = xt::sum(xt::pow((double)-1, xt::arange(degree - 2)) * fixed_coefficients)();
+      double sigma_1 = xt::sum(xt::pow(-1.0, xt::arange(degree - 2)) * fixed_coefficients)();
       if (degree % 2 == 1) { // odd degree
         series->coefficients[degree - 1] = (left.value + right.value - sigma_1 - sigma_2) / 2.0;
         series->coefficients[degree] = right.value - series->coefficients[degree - 1] - sigma_2;
@@ -56,13 +56,10 @@ void HeatSolver::forceBoundaryConditions(TschebFun *series, BC left, BC right) {
     }
     case Neumann: {
       size_t N = series->order();
-      Vector K = xt::arange<double>(3, degree - 2);
-      Vector middle_coefficients = xt::view(series->coefficients, xt::range(3, degree - 2));
-      double sigma_3 = series->coefficients[1] - 4 * series->coefficients[2] +
-                       xt::sum((2 + K * (K - 2)) * xt::pow((double)-1, K - 1) * middle_coefficients)();
-      std::cout << tau_1 << ", " << tau_2 << ", " << sigma_2 << ", " << sigma_3 << std::endl;
-      series->coefficients[degree] = (left.value + tau_1 * sigma_2 - sigma_3 - tau_1 * right.value) / (tau_2 - tau_1);
-      series->coefficients[degree - 1] = right.value - sigma_2 - series->coefficients[degree];
+      Vector K = xt::arange<double>(0, N - 3);
+      double sigma_3 = -xt::sum(xt::pow(K, 2) * xt::pow(-1.0, K) * fixed_coefficients)();
+      series->coefficients[N - 1] = (left.value - sigma_3 + tau_2 * (right.value - sigma_2)) / tau_1;
+      series->coefficients[N - 2] = right.value - sigma_2 - series->coefficients[degree];
       std::cout << "Set highest-order coefficients to: a_{N-2} = " << series->coefficients[degree - 1]
                 << " and a_{N-1} = " << series->coefficients[degree] << std::endl;
       std::cout << "Derivative at x=-1: " << series->derivative().evaluateOn({-1})[0] << ", should be: " << left.value
