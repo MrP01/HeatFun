@@ -13,7 +13,7 @@ void print(std::string text, Vector x) {
 }
 
 TschebFun::TschebFun(Vector coeffs) : coefficients(coeffs) {
-  xt::filter(coefficients, xt::abs(coefficients) < epsilon) = 0;
+  // xt::filter(coefficients, xt::abs(coefficients) < epsilon) = 0;
   print("Constructed TschebFun with", coefficients);
 }
 

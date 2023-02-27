@@ -19,8 +19,8 @@
 #include <fstream>
 #include <xtensor/xcsv.hpp>
 
-#define STEPS_PER_FRAME 1 // number of timesteps per frame
-#define RENDER_INTERVAL_MILLISECONDS 10
+#define STEPS_PER_FRAME 1000 // number of timesteps per frame
+#define RENDER_INTERVAL_MILLISECONDS 40
 #define N_LINSPACE_POINTS_TO_PLOT 500
 #define SIDE_PANEL_MAX_WIDTH 250
 

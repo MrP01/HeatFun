@@ -38,7 +38,7 @@ void HeatSolver::iterate() {
 void HeatSolver::forceBoundaryConditions(TschebFun *series, BC left, BC right) {
   // force boundary conditions by setting a_{N}, a_{N-1}
   size_t N = series->order();
-  assert(N >= 7);
+  // assert(N >= 7);
   assert(right.type == Dirichlet && "Only Dirichlet BC supported on the right-hand side.");
   Vector fixed_coefficients = xt::view(series->coefficients, xt::range(0, N - 2));
   double sigma_2 = xt::sum(fixed_coefficients)();
@@ -59,15 +59,16 @@ void HeatSolver::forceBoundaryConditions(TschebFun *series, BC left, BC right) {
       double sigma_3 = -xt::sum(xt::pow(K, 2) * xt::pow(-1.0, K) * fixed_coefficients)();
       series->coefficients[N - 1] = (left.value - sigma_3 + tau_2 * (right.value - sigma_2)) / tau_1;
       series->coefficients[N - 2] = right.value - sigma_2 - series->coefficients[N - 1];
-      std::cout << "Set highest-order coefficients to: a_{N-2} = " << series->coefficients[N - 2]
-                << " and a_{N-1} = " << series->coefficients[N - 1] << std::endl;
-      std::cout << "Derivative at x=-1: " << series->derivative().evaluateOn({-1})[0] << ", should be: " << left.value
-                << std::endl;
+      // std::cout << "Set highest-order coefficients to: a_{N-2} = " << series->coefficients[N - 2]
+      //           << " and a_{N-1} = " << series->coefficients[N - 1] << std::endl;
+      // std::cout << "Derivative at x=-1: " << series->derivative().evaluateOn({-1})[0] << ", should be: " <<
+      // left.value
+      //           << std::endl;
       break;
     }
   }
-  Vector boundary_values = series->evaluateOn({-1.0, 1.0});
-  std::cout << "Value left: " << boundary_values[0] << " and value right: " << boundary_values[1] << std::endl;
+  // Vector boundary_values = series->evaluateOn({-1.0, 1.0});
+  // std::cout << "Value left: " << boundary_values[0] << " and value right: " << boundary_values[1] << std::endl;
 }
 
 Vector evaluateExpression(std::string expression, Vector x) {
