@@ -5,4 +5,3 @@ xtensor/0.24.2
 
 [generators]
 CMakeDeps
-cmake
