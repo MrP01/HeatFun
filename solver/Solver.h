@@ -19,10 +19,10 @@ typedef struct BoundaryCondition BC;
 class HeatSolver {
  public:
   double alpha = 1.0;
-  double dt = 1e-5;
+  double dt = 2e-6;
   struct BoundaryCondition left_bc;
   struct BoundaryCondition right_bc;
-  double totalTime = 0;
+  double totalTime = 0.0;
   TschebFun currentU = TschebFun(1);
 
   struct Optimisations optimisations;

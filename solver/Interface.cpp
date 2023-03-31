@@ -28,11 +28,21 @@ void HeatDemonstrator::plotAndLoadU0Expression(std::string expression) {
 }
 
 void HeatDemonstrator::step() {
-  for (size_t i = 0; i < STEPS_PER_FRAME; i++)
-    solver()->iterate();
+  solver()->iterate();
   plotCurrentU();
   statsLabel->setText(QString("Current time: t = %1\nTime-step dt = %2").arg(solver()->totalTime).arg(solver()->dt));
 }
+
+void HeatDemonstrator::bigStep() {
+  for (size_t i = 0; i < MEASUREMENTS_PER_FRAME; i++) {
+    for (size_t j = 0; j < STEPS_PER_MEASUREMENT; j++)
+      solver()->iterate();
+    measure();
+  }
+  step();
+}
+
+void HeatDemonstrator::measure() {}
 
 void HeatDemonstrator::plotCurrentU(bool adaptYAxis) {
   Vector X = xt::linspace(-1.0, 1.0, N_LINSPACE_POINTS_TO_PLOT);
@@ -127,6 +137,7 @@ void HeatDemonstrator::buildUI() {
     plotCurrentU();
   });
   connect(stepBtn, &QPushButton::clicked, [=, this]() { step(); });
+  connect(bigStepBtn, &QPushButton::clicked, [=, this]() { bigStep(); });
   connect(controlBtn, &QPushButton::clicked, [=, this]() {
     if (controlBtn->text() == "Start") {
       _timerId = startTimer(RENDER_INTERVAL_MILLISECONDS);
@@ -170,6 +181,7 @@ void HeatDemonstrator::buildUI() {
   // sideLayout->addWidget(linearMultistepCheckBox);
   sideLayout->addWidget(controlBtn);
   sideLayout->addWidget(stepBtn);
+  sideLayout->addWidget(bigStepBtn);
   sideLayout->addWidget(differentiationBtn);
   sideLayout->addWidget(reinitBtn);
   sideLayout->addWidget(rescaleBtn);

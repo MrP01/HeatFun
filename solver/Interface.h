@@ -19,8 +19,9 @@
 #include <fstream>
 #include <xtensor/xcsv.hpp>
 
-#define STEPS_PER_FRAME 1000 // number of timesteps per frame
-#define RENDER_INTERVAL_MILLISECONDS 40
+#define STEPS_PER_MEASUREMENT 20  // number of steps per measurement
+#define MEASUREMENTS_PER_FRAME 10 // number of measurements per frame
+#define RENDER_INTERVAL_MILLISECONDS 50
 #define N_LINSPACE_POINTS_TO_PLOT 500
 #define SIDE_PANEL_MAX_WIDTH 250
 
@@ -40,6 +41,7 @@ class HeatDemonstrator : public QMainWindow {
   QLineEdit *goalDuEdit = new QLineEdit();
   QPushButton *controlBtn = new QPushButton("Start");
   QPushButton *stepBtn = new QPushButton("Step");
+  QPushButton *bigStepBtn = new QPushButton("Big Step");
   QPushButton *differentiationBtn = new QPushButton("Differentiate");
   QPushButton *reinitBtn = new QPushButton("Reset");
   QPushButton *rescaleBtn = new QPushButton("Rescale");
@@ -53,7 +55,9 @@ class HeatDemonstrator : public QMainWindow {
   size_t _start_step = 0;
   size_t _timerId;
   virtual void step();
-  virtual void timerEvent(QTimerEvent *event) { step(); };
+  virtual void bigStep();
+  virtual void measure();
+  virtual void timerEvent(QTimerEvent *event) { bigStep(); };
 
   virtual void plotChebpoints();
   virtual void plotCurrentU(bool adaptYAxis = false);

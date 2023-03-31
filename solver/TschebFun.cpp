@@ -2,19 +2,19 @@
 
 #define max(a, b) (a > b) ? a : b
 static const double pi = xt::numeric_constants<double>::PI;
-static const double epsilon = 1e-13;
+static const double epsilon = 1e-9;
 
 void print(std::string text, Vector x) {
-#ifndef SILENT
+  // #ifndef SILENT
   std::cout << text << ": ";
   std::copy(x.begin(), x.end(), std::ostream_iterator<float>(std::cout, ", "));
   std::cout << std::endl;
-#endif
+  // #endif
 }
 
 TschebFun::TschebFun(Vector coeffs) : coefficients(coeffs) {
   // xt::filter(coefficients, xt::abs(coefficients) < epsilon) = 0;
-  print("Constructed TschebFun with", coefficients);
+  // print("Constructed TschebFun with", coefficients);
 }
 
 Vector TschebFun::equipoints(size_t N) { return xt::linspace(0.0, pi, N); }

@@ -29,3 +29,5 @@ class TschebFun {
 
   Vector evaluateOnInterval(Vector x, double left, double right);
 };
+
+void print(std::string text, Vector x);
