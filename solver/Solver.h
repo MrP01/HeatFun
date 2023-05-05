@@ -1,7 +1,9 @@
 #pragma once
 
 #include "TschebFun.h"
+#include <fstream>
 #include <muparserx/mpParser.h>
+#include <xtensor/xcsv.hpp>
 
 struct Optimisations {
   bool adaptiveDt = false;
@@ -34,6 +36,9 @@ class HeatSolver {
   virtual void setup(Vector u0);
   virtual void iterate();
   virtual void forceBoundaryConditions(TschebFun *series, BC left, BC right);
+  virtual void exportToFile(std::string filename, size_t n_points);
+
+  void run(double time);
 };
 
 Vector evaluateExpression(std::string expression, Vector x);

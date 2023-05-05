@@ -153,12 +153,8 @@ void HeatDemonstrator::buildUI() {
     setupExpression(getExpression());
   });
   connect(rescaleBtn, &QPushButton::clicked, [=, this]() { plotCurrentU(true); });
-  connect(exportBtn, &QPushButton::clicked, [=, this]() {
-    std::ofstream out_file("/tmp/heat-state.csv");
-    Vector X = xt::linspace(-1.0, 1.0, N_LINSPACE_POINTS_TO_PLOT);
-    xt::dump_csv(out_file, xt::atleast_2d(solver()->currentU.evaluateOn(X)));
-    std::cout << "Exported u(x) in its current state to /tmp/heat-state.csv" << std::endl;
-  });
+  connect(exportBtn, &QPushButton::clicked,
+      [=, this]() { solver()->exportToFile("/tmp/heat-state.csv", N_LINSPACE_POINTS_TO_PLOT); });
 
   auto mainWidget = new QWidget(this);
   auto mainLayout = new QGridLayout(mainWidget);

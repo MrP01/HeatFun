@@ -30,6 +30,7 @@ class TschebFun {
   TschebFun operator-();
 
   Vector evaluateOnInterval(Vector x, double left, double right);
+  void storeEvaluationToFile(Vector x, std::string filename);
 };
 
 void print(std::string text, Vector x);

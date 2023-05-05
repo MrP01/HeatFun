@@ -16,8 +16,6 @@
 #include <QtCharts/QChartView>
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QScatterSeries>
-#include <fstream>
-#include <xtensor/xcsv.hpp>
 
 #define STEPS_PER_MEASUREMENT 20  // number of steps per measurement
 #define MEASUREMENTS_PER_FRAME 10 // number of measurements per frame

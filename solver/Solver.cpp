@@ -71,6 +71,18 @@ void HeatSolver::forceBoundaryConditions(TschebFun *series, BC left, BC right) {
   // std::cout << "Value left: " << boundary_values[0] << " and value right: " << boundary_values[1] << std::endl;
 }
 
+void HeatSolver::run(double time) {
+  for (size_t i = 0; i < time / dt; i++)
+    iterate();
+}
+
+void HeatSolver::exportToFile(std::string filename, size_t n_points) {
+  std::ofstream out_file(filename);
+  Vector X = xt::linspace(-1.0, 1.0, n_points);
+  xt::dump_csv(out_file, xt::atleast_2d(currentU.evaluateOn(X)));
+  std::cout << "Exported u(x) in its current state to " << filename << std::endl;
+}
+
 Vector evaluateExpression(std::string expression, Vector x) {
   mup::Value variable;
   mup::ParserX parser;
