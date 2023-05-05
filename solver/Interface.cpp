@@ -191,7 +191,7 @@ void HeatDemonstrator::buildUI() {
   sideLayout->addWidget(statsLabel);
   sideLayout->addStretch();
   mainLayout->addWidget(temperatureView, 0, 0);
-  mainLayout->addLayout(sideLayout, 0, 1);
+  mainLayout->addLayout(sideLayout, 0, 1, 2, 1);
   setCentralWidget(mainWidget);
   setWindowTitle("Spectral Heat Equation Solver");
 

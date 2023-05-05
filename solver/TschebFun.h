@@ -24,8 +24,10 @@ class TschebFun {
   static Vector modifiedChebpoints(size_t N);
 
   TschebFun operator+(const TschebFun &other);
+  TschebFun operator+(const double &addend);
   TschebFun operator-(const TschebFun &other);
   TschebFun operator*(const double &factor);
+  TschebFun operator-();
 
   Vector evaluateOnInterval(Vector x, double left, double right);
 };

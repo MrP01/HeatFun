@@ -66,6 +66,11 @@ TschebFun TschebFun::operator+(const TschebFun &other) {
   xt::view(new_coeffs, xt::range(0, other.coefficients.size())) += other.coefficients;
   return TschebFun(new_coeffs);
 }
+TschebFun TschebFun::operator+(const double &addend) {
+  TschebFun result = TschebFun(*this);
+  result.coefficients[0] += addend;
+  return result;
+}
 TschebFun TschebFun::operator-(const TschebFun &other) {
   size_t mine = coefficients.size(), theirs = other.coefficients.size();
   Vector new_coeffs = xt::zeros<double>({max(mine, theirs)});
@@ -74,6 +79,8 @@ TschebFun TschebFun::operator-(const TschebFun &other) {
   return TschebFun(new_coeffs);
 }
 TschebFun TschebFun::operator*(const double &factor) { return TschebFun(coefficients * factor); }
+
+TschebFun TschebFun::operator-() { return TschebFun(-coefficients); }
 
 Vector TschebFun::evaluateOnInterval(Vector x, double left, double right) {
   double beta_1 = 2 / (right - left);
